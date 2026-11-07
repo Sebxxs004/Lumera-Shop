@@ -74,3 +74,4 @@ El proyecto cuenta con `vercel.json` preconfigurado. Puedes desplegarlo conectan
 ```bash
 npx vercel
 ```
+
