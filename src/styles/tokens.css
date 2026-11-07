@@ -1,0 +1,109 @@
+:root {
+  /* ==========================================================================
+     LUMÉRA DESIGN TOKENS — ROSE & PASTEL PINK BOUTIQUE EDITION
+     Armonía entre el Rosa Magenta característico de LUMÉRA y tonos Rosa Pastel,
+     Pétalo Suave y Blush Crema para una experiencia boutique cálida y femenina.
+     ========================================================================== */
+
+  /* Paleta Principal: Del Rosa Luméra al Rosa Pastel */
+  --color-lumera-statement: #b81f62;      /* Rosa Boutique profundo para titulares y CTAs primarios */
+  --color-lumera-rose-medium: #d9538a;    /* Rosa medio vibrante para acentos y estados activos */
+  --color-lumera-mist: #eab8cf;           /* Rosa pastel medio para bordes delicados y contornos */
+  --color-lumera-pastel: #f7d6e6;         /* Rosa pastel suave para tags, barras y bloques de acento */
+  --color-lumera-pastel-soft: #fdf2f7;    /* Rosa pastel ultraligero para tarjetas y fondos secundarios */
+
+  /* Aliases compatibles con DESIGN.md */
+  --color-indigo-statement: var(--color-lumera-statement);
+  --color-indigo-mist: var(--color-lumera-mist);
+
+  /* Superficies y Neutros Cálidos */
+  --color-paper-white: #ffffff;
+  --surface-paper-white-canvas: #fffbfd;  /* Blanco galería con sutil subtono pétalo */
+  --surface-pastel-section: #fdf3f8;      /* Superficie rosa pastel suave para secciones alternadas */
+  --surface-fog-footer: #f9e2ed;          /* Footer en rosa pastel empolvado */
+  --color-fog: #f9e2ed;
+
+  --color-carbon: #23151c;                /* Carbón ciruela oscuro (más armónico que el negro puro) */
+  --color-graphite: #3a1f2d;              /* Grafito rosado oscuro para textos secundarios */
+
+  /* Hero Scrim — Degradado editorial entre Rosa Boutique y Rosa Pastel translúcido */
+  --hero-scrim-gradient: linear-gradient(
+    90deg,
+    rgba(158, 24, 82, 0.78) 0%,
+    rgba(217, 83, 138, 0.45) 52%,
+    rgba(247, 214, 230, 0.08) 100%
+  );
+
+  /* Typography — Font Families */
+  --font-soehne: 'DM Sans', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-integral: 'Anton', 'Bebas Neue', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-arial: 'Arial', ui-sans-serif, system-ui, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 11px;
+  --leading-caption: 1.5;
+  --tracking-caption: 0.063em;
+
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.5;
+  --tracking-body-sm: 0.043em;
+
+  --text-body: 16px;
+  --leading-body: 1.4;
+  --tracking-body: 0.033em;
+
+  --text-subheading: 18px;
+  --leading-subheading: 1.1;
+  --tracking-subheading: 0.04em;
+
+  --text-heading-sm: 35px;
+  --leading-heading-sm: 1;
+  --tracking-heading-sm: 0.035em;
+
+  --text-heading: 45px;
+  --leading-heading: 1;
+  --tracking-heading: 0.017em;
+
+  --text-heading-lg: 52px;
+  --leading-heading-lg: 0.92;
+  --tracking-heading-lg: 0.013em;
+
+  /* Typography — Weights */
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+
+  /* Spacing Scale */
+  --spacing-5: 5px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-13: 13px;
+  --spacing-15: 15px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-30: 30px;
+  --spacing-40: 40px;
+  --spacing-50: 50px;
+  --spacing-52: 52px;
+  --spacing-60: 60px;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap: 50px;
+  --card-padding: 30px;
+  --element-gap: 12px;
+
+  /* Border Radius */
+  --radius-md: 4px;
+  --radius-3xl: 41px;
+  --radius-full: 60px;
+
+  /* Named Radii */
+  --radius-tags: 41px;
+  --radius-cards: 8px;
+  --radius-inputs: 41px;
+  --radius-buttons: 41px;
+  --radius-buttons-lg: 60px;
+}
