@@ -103,7 +103,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-na-1',
         editorialTitle: 'THE PARTY EDIT',
-        subtitle: 'VESTIDO MIDI SATÉN ÉCLAT — $165.00',
+        subtitle: 'VESTIDO MIDI SATÉN ÉCLAT — $ 165.000',
         badge: 'BESTSELLER',
         image:
           'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1000&q=85',
@@ -112,7 +112,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-na-2',
         editorialTitle: 'MOST SOLD BEAUTY',
-        subtitle: 'LUMÉRA GLAZE PEPTIDE LIP OIL — $34.00',
+        subtitle: 'LUMÉRA GLAZE PEPTIDE LIP OIL — $ 34.000',
         badge: 'MOST SOLD',
         image:
           'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=1000&q=85',
@@ -121,7 +121,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-na-3',
         editorialTitle: 'TRENDING NOW',
-        subtitle: 'CORSET ESCULTURAL ARCHIVE — $110.00',
+        subtitle: 'CORSET ESCULTURAL ARCHIVE — $ 110.000',
         badge: 'NEW IN',
         image:
           'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1000&q=85',
@@ -201,7 +201,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-shop-1',
         editorialTitle: 'THE PARTY EDIT',
-        subtitle: 'VESTIDO MIDI SATÉN ÉCLAT — $165.00',
+        subtitle: 'VESTIDO MIDI SATÉN ÉCLAT — $ 165.000',
         badge: 'MOST SOLD',
         image:
           'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1000&q=85',
@@ -210,7 +210,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-shop-2',
         editorialTitle: 'ATELIER TAILORING',
-        subtitle: 'CONJUNTO SASTRE LINO ATELIER — $210.00',
+        subtitle: 'CONJUNTO SASTRE LINO ATELIER — $ 210.000',
         badge: 'BESTSELLER',
         image:
           'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1000&q=85',
@@ -219,7 +219,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-shop-3',
         editorialTitle: 'TRENDING NOW',
-        subtitle: 'PANTALÓN PALAZZO PINZAS — $145.00',
+        subtitle: 'PANTALÓN PALAZZO PINZAS — $ 145.000',
         badge: 'EDITORIAL PICK',
         image:
           'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1000&q=85',
@@ -292,8 +292,8 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
     featuredCards: [
       {
         id: 'feat-mk-1',
-        editorialTitle: ' #1 MOST SOLD LIP OIL',
-        subtitle: 'LUMÉRA GLAZE PEPTIDE LIP OIL — $34.00',
+        editorialTitle: '#1 MOST SOLD LIP OIL',
+        subtitle: 'LUMÉRA GLAZE PEPTIDE LIP OIL — $ 34.000',
         badge: 'BESTSELLER',
         image:
           'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=1000&q=85',
@@ -302,7 +302,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-mk-2',
         editorialTitle: 'VELVET COUTURE EDIT',
-        subtitle: 'VELVET COUTURE MATTE LIPSTICK — $38.00',
+        subtitle: 'VELVET COUTURE MATTE LIPSTICK — $ 38.000',
         badge: 'MOST SOLD',
         image:
           'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1000&q=85',
@@ -311,7 +311,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-mk-3',
         editorialTitle: 'ROSE ARCHIVE PALETTE',
-        subtitle: 'PALETA EDITORIAL 9 TONOS — $58.00',
+        subtitle: 'PALETA EDITORIAL 9 TONOS — $ 58.000',
         badge: 'LIMITED EDITION',
         image:
           'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=85',
@@ -359,7 +359,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-col-1',
         editorialTitle: 'SILK & CREPE ARCHIVE',
-        subtitle: 'MINI VESTIDO DRAPEADO NOCTURNE — $178.00',
+        subtitle: 'MINI VESTIDO DRAPEADO NOCTURNE — $ 178.000',
         badge: 'LIMITED EDITION',
         image:
           'https://images.unsplash.com/photo-1550639525-c97d455acf70?auto=format&fit=crop&w=1000&q=85',
@@ -368,7 +368,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-col-2',
         editorialTitle: 'SILK BLUSH ARCHIVE',
-        subtitle: 'SILK PETAL LIQUID BLUSH — $36.00',
+        subtitle: 'SILK PETAL LIQUID BLUSH — $ 36.000',
         badge: 'NEW IN',
         image:
           'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1000&q=85',
@@ -377,7 +377,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-col-3',
         editorialTitle: 'SCULPTED PLEATS',
-        subtitle: 'FALDA MIDI PLISADA LUMIÈRE — $138.00',
+        subtitle: 'FALDA MIDI PLISADA LUMIÈRE — $ 138.000',
         badge: 'EDITORIAL PICK',
         image:
           'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=1000&q=85',
@@ -421,7 +421,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-story-1',
         editorialTitle: 'ATELIER CRAFTSMANSHIP',
-        subtitle: 'BLUSA ORGANZA LAZO IMPERIAL — $128.00',
+        subtitle: 'BLUSA ORGANZA LAZO IMPERIAL — $ 128.000',
         badge: 'ARCHIVE',
         image:
           'https://images.unsplash.com/photo-1551163943-3f6a855d1153?auto=format&fit=crop&w=1000&q=85',
@@ -430,7 +430,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-story-2',
         editorialTitle: 'VEGAN PRO ARTISTRY',
-        subtitle: 'SET DE 6 BROCHAS ESCULTURALES — $72.00',
+        subtitle: 'SET DE 6 BROCHAS ESCULTURALES — $ 72.000',
         badge: 'PRO STUDIO',
         image:
           'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=85',
@@ -439,7 +439,7 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
       {
         id: 'feat-story-3',
         editorialTitle: 'PANORAMIC VOLUME',
-        subtitle: 'LASH SCULPT PANORAMIC MASCARA — $32.00',
+        subtitle: 'LASH SCULPT PANORAMIC MASCARA — $ 32.000',
         badge: 'BESTSELLER',
         image:
           'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=85',

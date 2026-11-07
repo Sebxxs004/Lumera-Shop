@@ -166,14 +166,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
         transition: 'background-color 0.2s ease',
       }}
     >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          alignItems: 'center',
-          gap: 'var(--spacing-20)',
-        }}
-      >
+      <div className="navbar-bar-layout">
         {/* 1. Far Left: LUMÉRA Dark Logo */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button
@@ -277,7 +270,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
           />
         </nav>
 
-        {/* 3. Far Right: USD $ + Search Icon + User/Saved Icon + Bag Icon */}
+        {/* 3. Far Right: Search Icon + User/Saved Icon + Bag Icon + Mobile Menu */}
         <div
           style={{
             display: 'flex',
@@ -286,19 +279,6 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
             gap: 'clamp(14px, 1.8vw, 24px)',
           }}
         >
-          <span
-            style={{
-              fontFamily: 'var(--font-gt-america-mono)',
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.09em',
-              color: 'var(--color-soft-black)',
-              textTransform: 'uppercase',
-            }}
-          >
-            USD $
-          </span>
-
           <button
             type="button"
             onClick={onToggleSearch}
