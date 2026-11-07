@@ -1,109 +1,127 @@
 :root {
   /* ==========================================================================
-     LUMÉRA DESIGN TOKENS — ROSE & PASTEL PINK BOUTIQUE EDITION
-     Armonía entre el Rosa Magenta característico de LUMÉRA y tonos Rosa Pastel,
-     Pétalo Suave y Blush Crema para una experiencia boutique cálida y femenina.
+     LUMÉRA DESIGN TOKENS — ALIGNE ARCHITECTURAL SPEC SHEET (Skills/DESIGN2.md)
+     "Editorial spec sheet on warm charcoal — near-total monochrome (#24170f on
+     #ffffff), with a single Signal Blue (#0073ff) accent reserved exclusively
+     for 'NEW IN' badge punctuation. Monospace body type, extended sans-serif
+     headlines with wide tracking, and 0px sharp border-radius."
      ========================================================================== */
 
-  /* Paleta Principal: Del Rosa Luméra al Rosa Pastel */
-  --color-lumera-statement: #b81f62;      /* Rosa Boutique profundo para titulares y CTAs primarios */
-  --color-lumera-rose-medium: #d9538a;    /* Rosa medio vibrante para acentos y estados activos */
-  --color-lumera-mist: #eab8cf;           /* Rosa pastel medio para bordes delicados y contornos */
-  --color-lumera-pastel: #f7d6e6;         /* Rosa pastel suave para tags, barras y bloques de acento */
-  --color-lumera-pastel-soft: #fdf2f7;    /* Rosa pastel ultraligero para tarjetas y fondos secundarios */
+  /* Colors (Exact DESIGN2.md tokens) */
+  --color-warm-charcoal: #24170f;
+  --color-soft-black: #151515;
+  --color-pure-white: #ffffff;
+  --color-ash-gray: #ececec;
+  --color-signal-blue: #0073ff;
 
-  /* Aliases compatibles con DESIGN.md */
-  --color-indigo-statement: var(--color-lumera-statement);
-  --color-indigo-mist: var(--color-lumera-mist);
+  /* Semantic Aliases for Modular Components */
+  --color-lumera-statement: var(--color-warm-charcoal);
+  --color-lumera-mist: var(--color-ash-gray);
+  --color-paper-white: var(--color-pure-white);
+  --color-carbon: var(--color-soft-black);
+  --color-graphite: var(--color-warm-charcoal);
+  --color-fog: var(--color-ash-gray);
 
-  /* Superficies y Neutros Cálidos */
-  --color-paper-white: #ffffff;
-  --surface-paper-white-canvas: #fffbfd;  /* Blanco galería con sutil subtono pétalo */
-  --surface-pastel-section: #fdf3f8;      /* Superficie rosa pastel suave para secciones alternadas */
-  --surface-fog-footer: #f9e2ed;          /* Footer en rosa pastel empolvado */
-  --color-fog: #f9e2ed;
+  /* Typography — Font Families (Substitutes per DESIGN2.md) */
+  --font-gt-america-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-nimbus-sans-extended: 'Barlow Condensed', 'Oswald', 'Bebas Neue', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-gtamericamonoregular: var(--font-gt-america-mono);
 
-  --color-carbon: #23151c;                /* Carbón ciruela oscuro (más armónico que el negro puro) */
-  --color-graphite: #3a1f2d;              /* Grafito rosado oscuro para textos secundarios */
+  /* Semantic Font Aliases */
+  --font-soehne: var(--font-gt-america-mono);
+  --font-integral: var(--font-nimbus-sans-extended);
 
-  /* Hero Scrim — Degradado editorial entre Rosa Boutique y Rosa Pastel translúcido */
-  --hero-scrim-gradient: linear-gradient(
-    90deg,
-    rgba(158, 24, 82, 0.78) 0%,
-    rgba(217, 83, 138, 0.45) 52%,
-    rgba(247, 214, 230, 0.08) 100%
-  );
+  /* Typography — Scale (Exact DESIGN2.md measurements) */
+  --text-caption: 10px;
+  --leading-caption: 1.6;
+  --tracking-caption: 0.93px; /* 0.093em at 10px */
 
-  /* Typography — Font Families */
-  --font-soehne: 'DM Sans', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-integral: 'Anton', 'Bebas Neue', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-arial: 'Arial', ui-sans-serif, system-ui, sans-serif;
+  --text-ui-sm: 11px;
+  --tracking-ui-sm: 0.071em;
 
-  /* Typography — Scale */
-  --text-caption: 11px;
-  --leading-caption: 1.5;
-  --tracking-caption: 0.063em;
+  --text-ui-md: 12px;
+  --tracking-ui-md: 0.067em;
 
-  --text-body-sm: 14px;
-  --leading-body-sm: 1.5;
-  --tracking-body-sm: 0.043em;
+  --text-body-sm: 12px;
+  --leading-body-sm: 1.6;
+  --tracking-body-sm: 0.067em;
 
-  --text-body: 16px;
-  --leading-body: 1.4;
-  --tracking-body: 0.033em;
+  --text-body: 14px;
+  --leading-body: 1.7;
+  --tracking-body: 0.88px; /* 0.063em at 14px */
 
-  --text-subheading: 18px;
-  --leading-subheading: 1.1;
-  --tracking-subheading: 0.04em;
+  --text-subheading: 16px;
+  --leading-subheading: 1.4;
+  --tracking-subheading: 1.6px;
 
-  --text-heading-sm: 35px;
-  --leading-heading-sm: 1;
-  --tracking-heading-sm: 0.035em;
+  --text-heading-sm: 24px;
+  --leading-heading-sm: 1.28;
+  --tracking-heading-sm: 0.24px;
 
-  --text-heading: 45px;
-  --leading-heading: 1;
-  --tracking-heading: 0.017em;
+  --text-heading: 40px;
+  --leading-heading: 1.13;
+  --tracking-heading: 4px; /* 0.10em at 40px */
 
-  --text-heading-lg: 52px;
-  --leading-heading-lg: 0.92;
-  --tracking-heading-lg: 0.013em;
+  --text-display: 60px;
+  --leading-display: 1.07;
+  --tracking-display: 7.98px; /* 0.133em at 60px */
 
   /* Typography — Weights */
+  --font-weight-light: 300;
   --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* Spacing Scale */
-  --spacing-5: 5px;
+  /* Spacing Scale (Base unit: 4px per DESIGN2.md) */
+  --spacing-unit: 4px;
+  --spacing-4: 4px;
+  --spacing-5: 4px;
   --spacing-6: 6px;
   --spacing-8: 8px;
   --spacing-10: 10px;
   --spacing-12: 12px;
-  --spacing-13: 13px;
-  --spacing-15: 15px;
+  --spacing-13: 12px;
+  --spacing-15: 16px;
   --spacing-16: 16px;
   --spacing-20: 20px;
   --spacing-24: 24px;
-  --spacing-30: 30px;
+  --spacing-30: 32px;
+  --spacing-32: 32px;
+  --spacing-36: 36px;
   --spacing-40: 40px;
-  --spacing-50: 50px;
-  --spacing-52: 52px;
+  --spacing-50: 56px;
+  --spacing-56: 56px;
   --spacing-60: 60px;
+  --spacing-80: 80px;
+  --spacing-100: 100px;
 
   /* Layout */
   --page-max-width: 1200px;
-  --section-gap: 50px;
-  --card-padding: 30px;
-  --element-gap: 12px;
+  --section-gap: 64px;
+  --card-padding: 20px;
+  --element-gap: 20px;
 
-  /* Border Radius */
-  --radius-md: 4px;
-  --radius-3xl: 41px;
-  --radius-full: 60px;
+  /* Border Radius — Strictly 0px sharp edges per DESIGN2.md */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-3xl: 0px;
+  --radius-full: 0px;
+  --radius-cards: 0px;
+  --radius-badges: 0px;
+  --radius-images: 0px;
+  --radius-inputs: 0px;
+  --radius-buttons: 0px;
+  --radius-buttons-lg: 0px;
+  --radius-tags: 0px;
 
-  /* Named Radii */
-  --radius-tags: 41px;
-  --radius-cards: 8px;
-  --radius-inputs: 41px;
-  --radius-buttons: 41px;
-  --radius-buttons-lg: 60px;
+  /* Shadows — Reserved exclusively for Primary CTA hover/active */
+  --shadow-md: rgba(0, 0, 0, 0.15) 0px 2px 10px 0px;
+
+  /* Surfaces */
+  --surface-warm-white-canvas: #ffffff;
+  --surface-ash-gray-band: #ececec;
+  --surface-warm-charcoal-surface: #24170f;
+  --surface-paper-white-canvas: var(--surface-warm-white-canvas);
+  --surface-fog-footer: var(--surface-warm-white-canvas);
 }
