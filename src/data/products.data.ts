@@ -535,7 +535,7 @@ export const PRODUCTS_DATA: Product[] = [
     description:
       'Un híbrido entre tratamiento labial intensivo y gloss de alto impacto. Formulado con tripéptidos voluminizadores, aceite de semilla de frambuesa y ácido hialurónico que rellenan e hidratan los labios durante 12 horas sin sensación pegajosa.',
     editorialNote:
-      'El tono 01 Luméra Berry replica exactamente el icónico pigmento rosa-magenta de nuestro logo.',
+      'El tono 01 Luméra Berry aporta un velo traslúcido de alto contraste con brillo cristal tridimensional.',
     colors: [
       {
         id: 'shade-01-lumera-berry',
@@ -738,11 +738,11 @@ export const PRODUCTS_DATA: Product[] = [
     description:
       'Una curaduría de 9 tonos diseñados para crear desde miradas suaves de día hasta ahumados editoriales en tonos rosa empolvado, malva, champagne reflectante y espresso profundo. Pigmentos micronizados de triple molienda que se difuminan sin esfuerzo.',
     editorialNote:
-      'Incluye espejo panorámico de borde a borde con marco en el icónico rosa Luméra.',
+      'Incluye espejo panorámico de borde a borde con estuche arquitectónico en acabado negro obsidiana.',
     colors: [
       {
         id: 'palette-01-rose-archive',
-        name: ' armonía 01 — Rose Archive (Rosas, Malvas & Champagne)',
+        name: 'Armonía 01 — Rose Archive (Rosas, Malvas & Champagne)',
         hex: '#c21863',
         finish: 'Mate + Shimmer + Topper',
         images: [
