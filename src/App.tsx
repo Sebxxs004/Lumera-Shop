@@ -90,6 +90,13 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleGoHome = () => {
+    setSelectedProductState(null);
+    setShowingWishlistOnly(false);
+    resetFilters();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleNavigateDepartment = (department: ProductDepartment) => {
     setSelectedProductState(null);
     setShowingWishlistOnly(false);
@@ -156,6 +163,7 @@ export const App: React.FC = () => {
           onSelectCategory={handleNavigateCategory}
           onSelectSearchFilter={handleNavigateSearchFilter}
           onSelectProduct={(product) => handleOpenProductDetail(product)}
+          onGoHome={handleGoHome}
           onToggleSearch={() => {
             setSelectedProductState(null);
             setIsSearchExpanded((prev) => !prev);

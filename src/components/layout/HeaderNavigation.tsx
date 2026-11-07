@@ -25,6 +25,7 @@ interface HeaderNavigationProps {
   onSelectCategory: (cat: ProductCategorySlug) => void;
   onSelectSearchFilter?: (query: string, dept?: ProductDepartment) => void;
   onSelectProduct?: (product: Product) => void;
+  onGoHome?: () => void;
   onToggleSearch: () => void;
   onOpenCart: () => void;
   onOpenSizeGuide: () => void;
@@ -34,8 +35,9 @@ interface HeaderNavigationProps {
 /**
  * HeaderNavigation
  * Single Responsibility: Implements the ALIGNE 3-zone top navigation bar with:
- * 1. Smoothly sliding horizontal indicator bar that glides across navbar links on hover/active
- * 2. Full-width Mega Menu deployment with left-hand subcategories and 3 right-hand Bestseller portrait cards
+ * - 4 primary items: INICIO, RECIÉN LLEGADO, ROPA, MAKEUP
+ * - Smoothly sliding horizontal indicator bar that glides across navbar links on hover/active
+ * - Full-width Mega Menu deployment for RECIÉN LLEGADO, ROPA, and MAKEUP
  */
 export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   activeDepartment,
@@ -48,13 +50,16 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   onSelectCategory,
   onSelectSearchFilter,
   onSelectProduct,
+  onGoHome,
   onToggleSearch,
   onOpenCart,
   onOpenSizeGuide,
   onFilterWishlistedOnly,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openSectionId, setOpenSectionId] = useState<NavSectionId | null>(null);
+  const [hoveredSectionId, setHoveredSectionId] = useState<NavSectionId | null>(
+    null
+  );
   const [indicatorStyle, setIndicatorStyle] = useState<{
     left: number;
     width: number;
@@ -66,15 +71,15 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
 
   // Determine which nav section is currently active based on filters
   const activeSectionId: NavSectionId = (() => {
-    if (showingWishlistOnly) return 'new-arrivals';
-    if (activeDepartment === 'boutique') return 'boutique';
+    if (showingWishlistOnly) return 'inicio';
+    if (activeDepartment === 'boutique') return 'ropa';
     if (activeDepartment === 'makeup') return 'makeup';
-    if (activeCategory !== 'all') return 'collections';
-    return 'new-arrivals';
+    if (activeCategory !== 'all') return 'recien-llegado';
+    return 'inicio';
   })();
 
   // Target section for the sliding bar: hovered section takes priority over active section
-  const targetSectionId = openSectionId ?? activeSectionId;
+  const targetSectionId = hoveredSectionId ?? activeSectionId;
 
   const updateSlidingIndicator = (sectionId: NavSectionId | null) => {
     if (!sectionId || !navContainerRef.current) {
@@ -98,18 +103,21 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   }, [targetSectionId]);
 
   const handleTopNavClick = (sectionId: NavSectionId) => {
-    if (sectionId === 'new-arrivals') {
+    if (sectionId === 'inicio') {
+      if (onGoHome) {
+        onGoHome();
+      } else {
+        onSelectDepartment('all');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else if (sectionId === 'recien-llegado') {
       onSelectDepartment('all');
-    } else if (sectionId === 'boutique') {
+    } else if (sectionId === 'ropa') {
       onSelectDepartment('boutique');
     } else if (sectionId === 'makeup') {
       onSelectDepartment('makeup');
-    } else if (sectionId === 'collections') {
-      onSelectCategory('vestidos-conjuntos');
-    } else if (sectionId === 'our-story') {
-      onOpenSizeGuide();
     }
-    setOpenSectionId(null);
+    setHoveredSectionId(null);
     setIsMobileMenuOpen(false);
   };
 
@@ -123,7 +131,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     } else if (item.department) {
       onSelectDepartment(item.department);
     }
-    setOpenSectionId(null);
+    setHoveredSectionId(null);
     setIsMobileMenuOpen(false);
   };
 
@@ -132,12 +140,14 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     if (product && onSelectProduct) {
       onSelectProduct(product);
     }
-    setOpenSectionId(null);
+    setHoveredSectionId(null);
     setIsMobileMenuOpen(false);
   };
 
-  const activeMegaMenuSection = openSectionId
-    ? NAVIGATION_SECTIONS.find((sec) => sec.id === openSectionId) ?? null
+  const activeMegaMenuSection = hoveredSectionId
+    ? NAVIGATION_SECTIONS.find(
+        (sec) => sec.id === hoveredSectionId && sec.hasMegaMenu
+      ) ?? null
     : null;
 
   const iconBtnStyle: React.CSSProperties = {
@@ -154,7 +164,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
 
   return (
     <header
-      onMouseLeave={() => setOpenSectionId(null)}
+      onMouseLeave={() => setHoveredSectionId(null)}
       style={{
         width: '100%',
         backgroundColor: activeMegaMenuSection
@@ -171,11 +181,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button
             type="button"
-            onClick={() => {
-              onSelectDepartment('all');
-              setOpenSectionId(null);
-              setIsMobileMenuOpen(false);
-            }}
+            onClick={() => handleTopNavClick('inicio')}
             aria-label="Ir al inicio de LUMÉRA"
             style={{
               background: 'none',
@@ -197,7 +203,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
           </button>
         </div>
 
-        {/* 2. Dead Center: 5 Uppercase Navigation Links + Sliding Bar */}
+        {/* 2. Dead Center: 4 Uppercase Navigation Links (INICIO - RECIÉN LLEGADO - ROPA - MAKEUP) + Sliding Bar */}
         <nav
           ref={navContainerRef}
           aria-label="Navegación principal"
@@ -205,14 +211,14 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
           style={{
             position: 'relative',
             justifyContent: 'center',
-            gap: 'clamp(22px, 2.8vw, 38px)',
+            gap: 'clamp(24px, 3.2vw, 44px)',
             paddingBottom: '6px',
           }}
         >
           {NAVIGATION_SECTIONS.map((sec) => {
-            const isHoveredOrOpen = openSectionId === sec.id;
+            const isHovered = hoveredSectionId === sec.id;
             const isHighlighted =
-              isHoveredOrOpen || (!openSectionId && activeSectionId === sec.id);
+              isHovered || (!hoveredSectionId && activeSectionId === sec.id);
 
             return (
               <button
@@ -221,10 +227,10 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
                   buttonRefs.current[sec.id] = el;
                 }}
                 type="button"
-                onMouseEnter={() => setOpenSectionId(sec.id)}
-                onFocus={() => setOpenSectionId(sec.id)}
+                onMouseEnter={() => setHoveredSectionId(sec.id)}
+                onFocus={() => setHoveredSectionId(sec.id)}
                 onClick={() => handleTopNavClick(sec.id)}
-                aria-expanded={isHoveredOrOpen}
+                aria-expanded={isHovered && sec.hasMegaMenu}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -234,7 +240,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
                   fontWeight: 600,
                   letterSpacing: '0.11em',
                   textTransform: 'uppercase',
-                  color: isHoveredOrOpen
+                  color: isHovered
                     ? 'var(--color-signal-blue)'
                     : isHighlighted
                     ? 'var(--color-soft-black)'
@@ -259,7 +265,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
               height: '2px',
               width: `${indicatorStyle.width}px`,
               transform: `translateX(${indicatorStyle.left}px)`,
-              backgroundColor: openSectionId
+              backgroundColor: hoveredSectionId
                 ? 'var(--color-signal-blue)'
                 : 'var(--color-soft-black)',
               opacity: indicatorStyle.opacity,
@@ -362,7 +368,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
           section={activeMegaMenuSection}
           onSelectSubcategory={handleSubcategoryClick}
           onSelectFeaturedCard={handleFeaturedCardClick}
-          onClose={() => setOpenSectionId(null)}
+          onClose={() => setHoveredSectionId(null)}
         />
       )}
 
@@ -414,29 +420,31 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
                   <span>{sec.label}</span>
                   <span>→</span>
                 </button>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '8px',
-                    marginTop: '8px',
-                  }}
-                >
-                  {sec.subcategories.slice(0, 5).map((sub) => (
-                    <button
-                      key={sub.id}
-                      type="button"
-                      onClick={() => handleSubcategoryClick(sub)}
-                      className="pill-btn pill-btn--outline"
-                      style={{
-                        padding: '5px 10px',
-                        fontSize: '10px',
-                      }}
-                    >
-                      {sub.label}
-                    </button>
-                  ))}
-                </div>
+                {sec.subcategories.length > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      marginTop: '8px',
+                    }}
+                  >
+                    {sec.subcategories.map((sub) => (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        onClick={() => handleSubcategoryClick(sub)}
+                        className="pill-btn pill-btn--outline"
+                        style={{
+                          padding: '5px 10px',
+                          fontSize: '10px',
+                        }}
+                      >
+                        {sub.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

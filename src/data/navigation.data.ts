@@ -1,11 +1,6 @@
 import { ProductCategorySlug, ProductDepartment } from '../types/product.types';
 
-export type NavSectionId =
-  | 'new-arrivals'
-  | 'boutique'
-  | 'makeup'
-  | 'collections'
-  | 'our-story';
+export type NavSectionId = 'inicio' | 'recien-llegado' | 'ropa' | 'makeup';
 
 export interface MegaMenuSubcategoryItem {
   id: string;
@@ -30,70 +25,83 @@ export interface MegaMenuFeaturedCard {
 export interface NavSectionConfig {
   id: NavSectionId;
   label: string;
+  hasMegaMenu: boolean;
   subcategories: MegaMenuSubcategoryItem[];
   featuredCards: MegaMenuFeaturedCard[];
 }
 
 /**
  * NAVIGATION_SECTIONS
- * Single Responsibility: Curated data model for the ALIGNE-style full-width
- * Mega Menu dropdown, mapping each top-level navigation item to its left-hand
- * subcategory list and its 3 right-hand bestseller portrait cards.
+ * Single Responsibility: Curated data model for the 4 primary navbar items:
+ * 1. INICIO
+ * 2. RECIÉN LLEGADO
+ * 3. ROPA
+ * 4. MAKEUP
+ * Each expandable section maps to its left-hand subcategory list and its 3 right-hand
+ * bestseller portrait cards.
  */
 export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
   {
-    id: 'new-arrivals',
-    label: 'NEW ARRIVALS',
+    id: 'inicio',
+    label: 'INICIO',
+    hasMegaMenu: false,
+    subcategories: [],
+    featuredCards: [],
+  },
+  {
+    id: 'recien-llegado',
+    label: 'RECIÉN LLEGADO',
+    hasMegaMenu: true,
     subcategories: [
       {
-        id: 'na-all',
-        label: 'SHOP ALL NEW ARRIVALS',
+        id: 'rl-all',
+        label: 'VER TODO RECIÉN LLEGADO',
         department: 'all',
         category: 'all',
       },
       {
-        id: 'na-boutique',
-        label: 'NEW IN: ROPA & BOUTIQUE',
+        id: 'rl-ropa',
+        label: 'NUEVOS INGRESOS: ROPA',
         department: 'boutique',
       },
       {
-        id: 'na-makeup',
-        label: 'NEW IN: MAQUILLAJE',
+        id: 'rl-makeup',
+        label: 'NUEVOS INGRESOS: MAKEUP',
         department: 'makeup',
       },
       {
-        id: 'na-dresses',
+        id: 'rl-vestidos',
         label: 'VESTIDOS & CONJUNTOS',
         category: 'vestidos-conjuntos',
       },
       {
-        id: 'na-tops',
-        label: 'CORSÉTERÍA & TOPS',
+        id: 'rl-tops',
+        label: 'CORSÉTERÍA & BLUSAS',
         category: 'tops-blusas',
       },
       {
-        id: 'na-bottoms',
-        label: 'SASTRERÍA & PANTALONES',
+        id: 'rl-pantalones',
+        label: 'FALDAS & PANTALONES',
         category: 'faldas-pantalones',
       },
       {
-        id: 'na-lips',
+        id: 'rl-labios',
         label: 'LABIOS & ROSTRO',
         category: 'maquillaje-labios-rostro',
       },
       {
-        id: 'na-eyes',
+        id: 'rl-ojos',
         label: 'OJOS & PALETAS',
         category: 'maquillaje-ojos-paletas',
       },
       {
-        id: 'na-satin',
-        label: 'SATÉN DE SEDA',
+        id: 'rl-saten',
+        label: 'CÁPSULA SATÉN DE SEDA',
         department: 'boutique',
         searchQuery: 'Satén',
       },
       {
-        id: 'na-peptides',
+        id: 'rl-peptidos',
         label: 'FÓRMULAS CON PÉPTIDOS',
         department: 'makeup',
         searchQuery: 'Péptidos',
@@ -101,28 +109,28 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
     ],
     featuredCards: [
       {
-        id: 'feat-na-1',
-        editorialTitle: 'THE PARTY EDIT',
+        id: 'feat-rl-1',
+        editorialTitle: 'LO MÁS VENDIDO EN ROPA',
         subtitle: 'VESTIDO MIDI SATÉN ÉCLAT — $ 165.000',
-        badge: 'BESTSELLER',
+        badge: 'MÁS VENDIDO',
         image:
           'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-dress-001',
       },
       {
-        id: 'feat-na-2',
-        editorialTitle: 'MOST SOLD BEAUTY',
+        id: 'feat-rl-2',
+        editorialTitle: 'LO MÁS VENDIDO EN MAKEUP',
         subtitle: 'LUMÉRA GLAZE PEPTIDE LIP OIL — $ 34.000',
-        badge: 'MOST SOLD',
+        badge: 'MÁS VENDIDO',
         image:
           'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-mk-001',
       },
       {
-        id: 'feat-na-3',
-        editorialTitle: 'TRENDING NOW',
+        id: 'feat-rl-3',
+        editorialTitle: 'RECIÉN LLEGADO',
         subtitle: 'CORSET ESCULTURAL ARCHIVE — $ 110.000',
-        badge: 'NEW IN',
+        badge: 'NUEVO',
         image:
           'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-top-001',
@@ -130,86 +138,92 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
     ],
   },
   {
-    id: 'boutique',
-    label: 'SHOP',
+    id: 'ropa',
+    label: 'ROPA',
+    hasMegaMenu: true,
     subcategories: [
       {
-        id: 'shop-all-boutique',
-        label: 'SHOP ALL',
+        id: 'ropa-all',
+        label: 'VER TODA LA ROPA',
         department: 'boutique',
       },
       {
-        id: 'shop-dresses',
-        label: 'DRESSES & CO-ORDS',
+        id: 'ropa-vestidos',
+        label: 'VESTIDOS & CONJUNTOS',
         category: 'vestidos-conjuntos',
       },
       {
-        id: 'shop-tailoring',
-        label: 'TAILORING & BLAZERS',
+        id: 'ropa-tops',
+        label: 'TOPS & BLUSAS',
+        category: 'tops-blusas',
+      },
+      {
+        id: 'ropa-faldas-pantalones',
+        label: 'FALDAS & PANTALONES',
+        category: 'faldas-pantalones',
+      },
+      {
+        id: 'ropa-sastreria',
+        label: 'SASTRERÍA & BLAZERS',
         department: 'boutique',
         searchQuery: 'Sastre',
       },
       {
-        id: 'shop-corsetry',
-        label: 'CORSETRY',
+        id: 'ropa-corseteria',
+        label: 'CORSÉTERÍA ESCULTURAL',
         department: 'boutique',
         searchQuery: 'Corset',
       },
       {
-        id: 'shop-tops',
-        label: 'TOPS & BLOUSES',
-        category: 'tops-blusas',
-      },
-      {
-        id: 'shop-trousers',
-        label: 'TROUSERS & PALAZZO',
+        id: 'ropa-palazzo',
+        label: 'PANTALONES PALAZZO',
         department: 'boutique',
         searchQuery: 'Pantalón',
       },
       {
-        id: 'shop-skirts',
-        label: 'SKIRTS',
+        id: 'ropa-faldas',
+        label: 'FALDAS MIDI PLISADAS',
         department: 'boutique',
         searchQuery: 'Falda',
       },
       {
-        id: 'shop-satin',
-        label: 'SILK & SATIN',
+        id: 'ropa-saten',
+        label: 'SEDA & SATÉN',
         department: 'boutique',
         searchQuery: 'Satén',
       },
       {
-        id: 'shop-linen',
-        label: 'ATELIER LINEN',
+        id: 'ropa-lino',
+        label: 'LINO ORGÁNICO ATELIER',
         department: 'boutique',
         searchQuery: 'Lino',
       },
       {
-        id: 'shop-organza',
-        label: 'SHEER ORGANZA',
+        id: 'ropa-organza',
+        label: 'ORGANZA DE SEDA',
         department: 'boutique',
         searchQuery: 'Organza',
       },
       {
-        id: 'shop-size-guide',
-        label: 'SIZE SPEC GUIDE',
+        id: 'ropa-guia-tallas',
+        label: 'GUÍA DE TALLAS (ROPA)',
         openSizeGuide: true,
         isHighlight: true,
       },
     ],
     featuredCards: [
       {
-        id: 'feat-shop-1',
-        editorialTitle: 'THE PARTY EDIT',
+        id: 'feat-ropa-1',
+        editorialTitle: '#1 MÁS VENDIDO — NOCHE',
         subtitle: 'VESTIDO MIDI SATÉN ÉCLAT — $ 165.000',
-        badge: 'MOST SOLD',
+        badge: 'MÁS VENDIDO',
         image:
           'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-dress-001',
       },
       {
-        id: 'feat-shop-2',
-        editorialTitle: 'ATELIER TAILORING',
+        id: 'feat-ropa-2',
+        editorialTitle: 'SASTRERÍA MÁS VENDIDA',
         subtitle: 'CONJUNTO SASTRE LINO ATELIER — $ 210.000',
         badge: 'BESTSELLER',
         image:
@@ -217,10 +231,10 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
         productId: 'lum-dress-002',
       },
       {
-        id: 'feat-shop-3',
-        editorialTitle: 'TRENDING NOW',
+        id: 'feat-ropa-3',
+        editorialTitle: 'TENDENCIA EN ROPA',
         subtitle: 'PANTALÓN PALAZZO PINZAS — $ 145.000',
-        badge: 'EDITORIAL PICK',
+        badge: 'FAVORITO',
         image:
           'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-bottom-001',
@@ -230,61 +244,62 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
   {
     id: 'makeup',
     label: 'MAKEUP',
+    hasMegaMenu: true,
     subcategories: [
       {
         id: 'mk-all',
-        label: 'SHOP ALL MAKEUP',
+        label: 'VER TODO MAKEUP',
         department: 'makeup',
       },
       {
-        id: 'mk-lips-face',
-        label: 'LIPS & CHEEKS',
+        id: 'mk-labios-rostro',
+        label: 'LABIOS & ROSTRO',
         category: 'maquillaje-labios-rostro',
       },
       {
-        id: 'mk-eyes-palettes',
-        label: 'EYES & PALETTES',
+        id: 'mk-ojos-paletas',
+        label: 'OJOS & PALETAS',
         category: 'maquillaje-ojos-paletas',
       },
       {
         id: 'mk-lip-oil',
-        label: 'PEPTIDE LIP OILS',
+        label: 'ACEITES LABIALES (LIP OILS)',
         department: 'makeup',
         searchQuery: 'Lip Oil',
       },
       {
-        id: 'mk-matte-lip',
-        label: 'VELVET MATTE LIPSTICKS',
+        id: 'mk-labiales-mate',
+        label: 'LABIALES VELVET MATE',
         department: 'makeup',
         searchQuery: 'Lipstick',
       },
       {
-        id: 'mk-blush',
-        label: 'LIQUID SILK BLUSH',
+        id: 'mk-rubores',
+        label: 'RUBORES LÍQUIDOS DE SEDA',
         department: 'makeup',
         searchQuery: 'Blush',
       },
       {
-        id: 'mk-eyeshadow',
-        label: '9-SHADE EYE PALETTES',
+        id: 'mk-paletas',
+        label: 'PALETAS DE SOMBRAS (9 TONOS)',
         department: 'makeup',
         searchQuery: 'Paleta',
       },
       {
-        id: 'mk-mascara',
-        label: 'SCULPT MASCARA',
+        id: 'mk-mascaras',
+        label: 'MÁSCARAS DE PESTAÑAS',
         department: 'makeup',
         searchQuery: 'Máscara',
       },
       {
-        id: 'mk-brushes',
-        label: 'PRO VEGAN BRUSHES',
+        id: 'mk-brochas',
+        label: 'SETS DE BROCHAS VEGANAS',
         department: 'makeup',
         searchQuery: 'Brochas',
       },
       {
-        id: 'mk-shade-guide',
-        label: 'SHADE & FINISH SPEC',
+        id: 'mk-guia-tonos',
+        label: 'GUÍA DE TONOS & ACABADOS',
         openSizeGuide: true,
         isHighlight: true,
       },
@@ -292,158 +307,30 @@ export const NAVIGATION_SECTIONS: NavSectionConfig[] = [
     featuredCards: [
       {
         id: 'feat-mk-1',
-        editorialTitle: '#1 MOST SOLD LIP OIL',
+        editorialTitle: '#1 MÁS VENDIDO EN MAKEUP',
         subtitle: 'LUMÉRA GLAZE PEPTIDE LIP OIL — $ 34.000',
-        badge: 'BESTSELLER',
+        badge: 'MÁS VENDIDO',
         image:
           'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-mk-001',
       },
       {
         id: 'feat-mk-2',
-        editorialTitle: 'VELVET COUTURE EDIT',
+        editorialTitle: 'FAVORITO EN LABIOS',
         subtitle: 'VELVET COUTURE MATTE LIPSTICK — $ 38.000',
-        badge: 'MOST SOLD',
+        badge: 'BESTSELLER',
         image:
           'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-mk-002',
       },
       {
         id: 'feat-mk-3',
-        editorialTitle: 'ROSE ARCHIVE PALETTE',
-        subtitle: 'PALETA EDITORIAL 9 TONOS — $ 58.000',
-        badge: 'LIMITED EDITION',
+        editorialTitle: 'PALETA MÁS VENDIDA',
+        subtitle: 'PALETA EDITORIAL ROSE ARCHIVE — $ 58.000',
+        badge: 'EDICIÓN LIMITADA',
         image:
           'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=85',
         productId: 'lum-mk-004',
-      },
-    ],
-  },
-  {
-    id: 'collections',
-    label: 'COLLECTIONS',
-    subcategories: [
-      {
-        id: 'col-all',
-        label: 'ALL COLLECTIONS',
-        department: 'all',
-        category: 'all',
-      },
-      {
-        id: 'col-evening',
-        label: 'THE PARTY EDIT',
-        category: 'vestidos-conjuntos',
-      },
-      {
-        id: 'col-sculpt',
-        label: 'SCULPTED SILHOUETTES',
-        category: 'tops-blusas',
-      },
-      {
-        id: 'col-tailoring',
-        label: 'ARCHITECTURAL TAILORING',
-        category: 'faldas-pantalones',
-      },
-      {
-        id: 'col-rose-archive',
-        label: 'ROSE ARCHIVE BEAUTY',
-        category: 'maquillaje-ojos-paletas',
-      },
-      {
-        id: 'col-dewy-skin',
-        label: 'GLASS SKIN & PEPTIDES',
-        category: 'maquillaje-labios-rostro',
-      },
-    ],
-    featuredCards: [
-      {
-        id: 'feat-col-1',
-        editorialTitle: 'SILK & CREPE ARCHIVE',
-        subtitle: 'MINI VESTIDO DRAPEADO NOCTURNE — $ 178.000',
-        badge: 'LIMITED EDITION',
-        image:
-          'https://images.unsplash.com/photo-1550639525-c97d455acf70?auto=format&fit=crop&w=1000&q=85',
-        productId: 'lum-dress-003',
-      },
-      {
-        id: 'feat-col-2',
-        editorialTitle: 'SILK BLUSH ARCHIVE',
-        subtitle: 'SILK PETAL LIQUID BLUSH — $ 36.000',
-        badge: 'NEW IN',
-        image:
-          'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1000&q=85',
-        productId: 'lum-mk-003',
-      },
-      {
-        id: 'feat-col-3',
-        editorialTitle: 'SCULPTED PLEATS',
-        subtitle: 'FALDA MIDI PLISADA LUMIÈRE — $ 138.000',
-        badge: 'EDITORIAL PICK',
-        image:
-          'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=1000&q=85',
-        productId: 'lum-bottom-002',
-      },
-    ],
-  },
-  {
-    id: 'our-story',
-    label: 'OUR STORY',
-    subcategories: [
-      {
-        id: 'story-catalog',
-        label: 'EXPLORE FULL ARCHIVE',
-        department: 'all',
-        category: 'all',
-      },
-      {
-        id: 'story-size-spec',
-        label: 'GARMENT SIZE SPEC SHEET',
-        openSizeGuide: true,
-        isHighlight: true,
-      },
-      {
-        id: 'story-shade-spec',
-        label: 'MAKEUP SHADE MATRIX',
-        openSizeGuide: true,
-      },
-      {
-        id: 'story-boutique',
-        label: 'ATELIER BOUTIQUE',
-        department: 'boutique',
-      },
-      {
-        id: 'story-beauty',
-        label: 'CLEAN BEAUTY LAB',
-        department: 'makeup',
-      },
-    ],
-    featuredCards: [
-      {
-        id: 'feat-story-1',
-        editorialTitle: 'ATELIER CRAFTSMANSHIP',
-        subtitle: 'BLUSA ORGANZA LAZO IMPERIAL — $ 128.000',
-        badge: 'ARCHIVE',
-        image:
-          'https://images.unsplash.com/photo-1551163943-3f6a855d1153?auto=format&fit=crop&w=1000&q=85',
-        productId: 'lum-top-002',
-      },
-      {
-        id: 'feat-story-2',
-        editorialTitle: 'VEGAN PRO ARTISTRY',
-        subtitle: 'SET DE 6 BROCHAS ESCULTURALES — $ 72.000',
-        badge: 'PRO STUDIO',
-        image:
-          'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=85',
-        productId: 'lum-mk-006',
-      },
-      {
-        id: 'feat-story-3',
-        editorialTitle: 'PANORAMIC VOLUME',
-        subtitle: 'LASH SCULPT PANORAMIC MASCARA — $ 32.000',
-        badge: 'BESTSELLER',
-        image:
-          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=85',
-        productId: 'lum-mk-005',
       },
     ],
   },
