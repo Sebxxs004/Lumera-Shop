@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { ProductCategorySlug, ProductDepartment } from '../../types/product.types';
 
 interface HeaderNavigationProps {
@@ -19,10 +19,10 @@ interface HeaderNavigationProps {
 
 /**
  * HeaderNavigation
- * Single Responsibility: Persistent architectural top navigation per Skills/DESIGN2.md
- * - Logo mark (/assets/LUMERA-PNG.png in dark tone) far left
- * - Navigation & utility links far right in GT America Mono 11px weight 500,
- *   letter-spacing 0.071em uppercase, #151515 on #ffffff canvas.
+ * Single Responsibility: Exact ALIGNE-style 3-zone top navigation bar:
+ * - Far Left: Brand Logo (/assets/LUMERA-PNG.png)
+ * - Center: 5 uppercase navigation links (NEW ARRIVALS, SHOP, COLLECTIONS, THE GET UP, OUR STORY)
+ * - Far Right: USD $ + minimal stroke icons (Search, Account/Saved, Shopping Bag)
  */
 export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   activeDepartment,
@@ -46,7 +46,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     onClick: () => void;
   }> = [
     {
-      label: 'SHOP ALL',
+      label: 'NEW ARRIVALS',
       isActive:
         activeDepartment === 'all' &&
         activeCategory === 'all' &&
@@ -57,7 +57,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
       },
     },
     {
-      label: 'MODA BOUTIQUE',
+      label: 'SHOP BOUTIQUE',
       isActive: activeDepartment === 'boutique' && !showingWishlistOnly,
       onClick: () => {
         onSelectDepartment('boutique');
@@ -73,7 +73,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
       },
     },
     {
-      label: 'VESTIDOS & SETS',
+      label: 'COLLECTIONS',
       isActive:
         activeCategory === 'vestidos-conjuntos' && !showingWishlistOnly,
       onClick: () => {
@@ -81,9 +81,17 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
         setIsMobileMenuOpen(false);
       },
     },
+    {
+      label: 'SIZE SPEC',
+      isActive: false,
+      onClick: () => {
+        onOpenSizeGuide();
+        setIsMobileMenuOpen(false);
+      },
+    },
   ];
 
-  const monoLinkStyle = (isActive = false): React.CSSProperties => ({
+  const centerNavLinkStyle = (isActive = false): React.CSSProperties => ({
     background: 'none',
     border: 'none',
     borderBottom: isActive
@@ -92,148 +100,199 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     padding: '4px 0',
     fontFamily: 'var(--font-gt-america-mono)',
     fontSize: '11px',
-    fontWeight: 'var(--font-weight-medium)',
-    letterSpacing: '0.071em',
+    fontWeight: 600,
+    letterSpacing: '0.11em',
     textTransform: 'uppercase',
     color: 'var(--color-soft-black)',
     cursor: 'pointer',
+    whiteSpace: 'nowrap',
   });
+
+  const iconBtnStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    padding: '4px',
+    color: 'var(--color-soft-black)',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  };
 
   return (
     <header
       style={{
-        backgroundColor: 'var(--color-pure-white)',
-        borderBottom: '1px solid var(--color-warm-charcoal)',
-        padding: '16px 0',
-        position: 'sticky',
-        top: 0,
+        width: '100%',
+        backgroundColor: 'transparent',
+        padding: '22px clamp(16px, 3.5vw, 44px)',
+        position: 'relative',
         zIndex: 80,
       }}
     >
-      <div className="lumera-container header-grid">
-        {/* Far Left: Dark Logo Mark (/assets/LUMERA-PNG.png) */}
-        <button
-          type="button"
-          onClick={() => {
-            onSelectDepartment('all');
-            setIsMobileMenuOpen(false);
-          }}
-          aria-label="Ir al inicio de LUMÉRA"
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          alignItems: 'center',
+          gap: 'var(--spacing-20)',
+        }}
+      >
+        {/* 1. Far Left: LUMÉRA Dark Logo */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={() => {
+              onSelectDepartment('all');
+              setIsMobileMenuOpen(false);
+            }}
+            aria-label="Ir al inicio de LUMÉRA"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            <img
+              src="/assets/LUMERA-PNG.png"
+              alt="LUMÉRA"
+              style={{
+                height: 'clamp(26px, 3.2vw, 36px)',
+                width: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+          </button>
+        </div>
+
+        {/* 2. Dead Center: 5 Uppercase Navigation Links */}
+        <nav
+          aria-label="Navegación principal"
+          className="desktop-nav"
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 'clamp(20px, 2.8vw, 38px)',
           }}
         >
-          <img
-            src="/assets/LUMERA-PNG.png"
-            alt="LUMÉRA"
-            style={{
-              height: 'clamp(30px, 4.2vw, 44px)',
-              width: 'auto',
-              objectFit: 'contain',
-            }}
-          />
-        </button>
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={item.onClick}
+              style={centerNavLinkStyle(item.isActive)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
 
-        {/* Far Right: Architectural Monospace Navigation & Utility Links */}
+        {/* 3. Far Right: USD $ + Search Icon + User/Saved Icon + Bag Icon */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 'clamp(14px, 2.2vw, 28px)',
+            justifyContent: 'flex-end',
+            gap: 'clamp(14px, 1.8vw, 24px)',
           }}
         >
-          <nav aria-label="Navegación principal" className="desktop-nav">
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={item.onClick}
-                style={monoLinkStyle(item.isActive)}
-              >
-                {item.label}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              onClick={onOpenSizeGuide}
-              style={monoLinkStyle(false)}
-            >
-              SIZE SPEC
-            </button>
-          </nav>
-
-          {/* Utility Text Links per DESIGN2.md */}
-          <div
+          <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'clamp(12px, 1.8vw, 22px)',
+              fontFamily: 'var(--font-gt-america-mono)',
+              fontSize: '11px',
+              fontWeight: 600,
+              letterSpacing: '0.09em',
+              color: 'var(--color-soft-black)',
+              textTransform: 'uppercase',
             }}
           >
-            <button
-              type="button"
-              onClick={onToggleSearch}
-              style={monoLinkStyle(isSearchOpen)}
-            >
-              SEARCH
-            </button>
+            USD $
+          </span>
 
-            <button
-              type="button"
-              onClick={onFilterWishlistedOnly}
-              style={monoLinkStyle(showingWishlistOnly)}
-            >
-              SAVED ({wishlistCount})
-            </button>
+          <button
+            type="button"
+            onClick={onToggleSearch}
+            title="Buscar productos"
+            aria-label="Buscar"
+            style={{
+              ...iconBtnStyle,
+              opacity: isSearchOpen ? 0.6 : 1,
+            }}
+          >
+            <Search size={18} strokeWidth={1.5} />
+          </button>
 
-            <button
-              type="button"
-              onClick={onOpenCart}
-              style={{
-                ...monoLinkStyle(false),
-                backgroundColor: 'var(--color-warm-charcoal)',
-                color: 'var(--color-pure-white)',
-                padding: '6px 12px',
-              }}
-            >
-              CART ({cartCount})
-            </button>
+          <button
+            type="button"
+            onClick={onFilterWishlistedOnly}
+            title="Guardados / Favoritos"
+            aria-label="Guardados"
+            style={iconBtnStyle}
+          >
+            <User size={18} strokeWidth={1.5} />
+            {wishlistCount > 0 && (
+              <span
+                style={{
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  marginLeft: '3px',
+                }}
+              >
+                {wishlistCount}
+              </span>
+            )}
+          </button>
 
-            {/* Mobile Hamburger Button */}
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              aria-label="Abrir menú"
-              className="mobile-menu-trigger"
-              style={{
-                background: 'none',
-                border: '1px solid var(--color-warm-charcoal)',
-                padding: '6px 10px',
-                color: 'var(--color-soft-black)',
-                cursor: 'pointer',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '10px',
-                letterSpacing: '0.093em',
-              }}
-            >
-              {isMobileMenuOpen ? <X size={15} /> : <Menu size={15} />}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onOpenCart}
+            title="Bolsa de compras"
+            aria-label="Bolsa de compras"
+            style={iconBtnStyle}
+          >
+            <ShoppingBag size={18} strokeWidth={1.5} />
+            {cartCount > 0 && (
+              <span
+                style={{
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  marginLeft: '3px',
+                }}
+              >
+                {cartCount}
+              </span>
+            )}
+          </button>
+
+          {/* Mobile Hamburger Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            aria-label="Abrir menú"
+            className="mobile-menu-trigger"
+            style={{
+              background: 'none',
+              border: '1px solid var(--color-warm-charcoal)',
+              padding: '5px 8px',
+              color: 'var(--color-soft-black)',
+              cursor: 'pointer',
+              alignItems: 'center',
+            }}
+          >
+            {isMobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+          </button>
         </div>
       </div>
 
-      {/* Architectural Mobile Menu Drawer */}
+      {/* Mobile Navigation Drawer */}
       {isMobileMenuOpen && (
         <div
           style={{
             backgroundColor: 'var(--color-pure-white)',
-            borderTop: '1px solid var(--color-warm-charcoal)',
+            border: '1px solid var(--color-warm-charcoal)',
             padding: 'var(--spacing-20) var(--spacing-16)',
             marginTop: 'var(--spacing-16)',
           }}
@@ -262,22 +321,6 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
                 <span>+</span>
               </button>
             ))}
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                onOpenSizeGuide();
-              }}
-              className="pill-btn pill-btn--outline"
-              style={{
-                width: '100%',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span>GUÍA DE MEDIDAS &amp; TONOS [SPEC]</span>
-              <span>+</span>
-            </button>
           </div>
         </div>
       )}

@@ -5,7 +5,7 @@ import { ProductGrid } from './components/catalog/ProductGrid';
 import { DepartmentShowcase } from './components/home/DepartmentShowcase';
 import { EditorialLookbook } from './components/home/EditorialLookbook';
 import { HeroBanner } from './components/home/HeroBanner';
-import { AnnouncementBar } from './components/layout/AnnouncementBar';
+import { LumeraNetworkGrid } from './components/home/LumeraNetworkGrid';
 import { Footer } from './components/layout/Footer';
 import { HeaderNavigation } from './components/layout/HeaderNavigation';
 import { ProductDetailView } from './components/product-detail/ProductDetailView';
@@ -121,34 +121,37 @@ export const App: React.FC = () => {
         backgroundColor: 'var(--surface-paper-white-canvas)',
       }}
     >
-      {/* 1. Top Utility Strip */}
-      <AnnouncementBar
-        onExploreClick={() => handleNavigateDepartment('all')}
-      />
-
-      {/* 2. Primary Header Navigation with LUMERA-PNG.png */}
-      <HeaderNavigation
-        activeDepartment={filters.department}
-        activeCategory={filters.category}
-        cartCount={cartSummary.totalItems}
-        wishlistCount={wishlistCount}
-        isSearchOpen={isSearchExpanded}
-        showingWishlistOnly={showingWishlistOnly}
-        onSelectDepartment={handleNavigateDepartment}
-        onSelectCategory={handleNavigateCategory}
-        onToggleSearch={() => {
-          setSelectedProductState(null);
-          setIsSearchExpanded((prev) => !prev);
-          setTimeout(scrollToCatalog, 80);
+      {/* 1. Integrated Top Header + Hero Area */}
+      <div
+        style={{
+          backgroundColor: selectedProductState
+            ? 'var(--surface-paper-white-canvas)'
+            : 'var(--color-ash-gray)',
         }}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
-        onFilterWishlistedOnly={() => {
-          setSelectedProductState(null);
-          setShowingWishlistOnly((prev) => !prev);
-          setTimeout(scrollToCatalog, 80);
-        }}
-      />
+      >
+        <HeaderNavigation
+          activeDepartment={filters.department}
+          activeCategory={filters.category}
+          cartCount={cartSummary.totalItems}
+          wishlistCount={wishlistCount}
+          isSearchOpen={isSearchExpanded}
+          showingWishlistOnly={showingWishlistOnly}
+          onSelectDepartment={handleNavigateDepartment}
+          onSelectCategory={handleNavigateCategory}
+          onToggleSearch={() => {
+            setSelectedProductState(null);
+            setIsSearchExpanded((prev) => !prev);
+            setTimeout(scrollToCatalog, 80);
+          }}
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
+          onFilterWishlistedOnly={() => {
+            setSelectedProductState(null);
+            setShowingWishlistOnly((prev) => !prev);
+            setTimeout(scrollToCatalog, 80);
+          }}
+        />
+      </div>
 
       {/* Floating Architectural Notification on Add to Cart */}
       {lastAddedNotification && (
@@ -276,6 +279,11 @@ export const App: React.FC = () => {
 
             {/* Curated Fashion + Makeup Editorial Lookbook */}
             <EditorialLookbook
+              onSelectProduct={(product) => handleOpenProductDetail(product)}
+            />
+
+            {/* The Luméra Network — Editorial Social Proof Grid per DESIGN2.md */}
+            <LumeraNetworkGrid
               onSelectProduct={(product) => handleOpenProductDetail(product)}
             />
           </>
