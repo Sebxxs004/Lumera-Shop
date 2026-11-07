@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ProductService } from '../services/product.service';
 import {
   ProductCategorySlug,
@@ -18,19 +18,28 @@ const INITIAL_FILTER_STATE: ProductFilterState = {
 
 /**
  * useProductFilters
- * Single Responsibility: State management and derived data for catalog navigation & filters.
+ * Single Responsibility: State management and derived data for catalog navigation & filters,
+ * subscribed to backend catalog updates.
  */
 export function useProductFilters() {
   const [filters, setFilters] = useState<ProductFilterState>(INITIAL_FILTER_STATE);
+  const [catalogRevision, setCatalogRevision] = useState(0);
+
+  useEffect(() => {
+    void ProductService.refreshFromBackend();
+    return ProductService.subscribe(() => {
+      setCatalogRevision((prev) => prev + 1);
+    });
+  }, []);
 
   const filteredProducts = useMemo(
     () => ProductService.filterAndSortProducts(filters),
-    [filters]
+    [filters, catalogRevision]
   );
 
   const activeCategoryDefinition = useMemo(
     () => ProductService.getCategoryBySlug(filters.category),
-    [filters.category]
+    [filters.category, catalogRevision]
   );
 
   const availableSizes = useMemo(
@@ -39,7 +48,7 @@ export function useProductFilters() {
         filters.category,
         filters.department
       ),
-    [filters.category, filters.department]
+    [filters.category, filters.department, catalogRevision]
   );
 
   const availableColors = useMemo(
@@ -48,7 +57,7 @@ export function useProductFilters() {
         filters.category,
         filters.department
       ),
-    [filters.category, filters.department]
+    [filters.category, filters.department, catalogRevision]
   );
 
   const setDepartment = (department: ProductDepartment) => {
@@ -102,7 +111,7 @@ export function useProductFilters() {
   const hasActiveFilters =
     filters.department !== 'all' ||
     filters.category !== 'all' ||
-    filters.searchQuery.trim() !== '' ||
+    filters.searchQuery.trim().length > 0 ||
     filters.selectedSize !== null ||
     filters.selectedColorName !== null;
 
@@ -113,6 +122,7 @@ export function useProductFilters() {
     availableSizes,
     availableColors,
     hasActiveFilters,
+    catalogRevision,
     setDepartment,
     setCategory,
     setSearchQuery,
@@ -122,4 +132,3 @@ export function useProductFilters() {
     resetFilters,
   };
 }
-

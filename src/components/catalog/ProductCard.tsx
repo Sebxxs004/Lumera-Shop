@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { CurrencyService } from '../../services/currency.service';
+import { VariantStockService } from '../../services/variant-stock.service';
 import {
   Product,
   ProductColorVariant,
@@ -32,11 +33,7 @@ interface ProductCardProps {
 /**
  * ProductCard
  * Single Responsibility: Architectural product card per Skills/DESIGN2.md
- * - Full-bleed editorial photograph (0px radius, no card border chrome — bleeds into white canvas)
- * - Small '+' glyph in bottom-right corner of image for quick-add (#151515)
- * - Below image: Product name in GT America Mono 12px weight 500 (#151515) with inline
- *   Signal Blue (#0073ff) 'NEW IN' badge + Price in GT America Mono 12px weight 400 (#151515)
- * - Interactive color swatches & size selector below for effortless shopping.
+ * with real-time variant stock and automatic 'AGOTADO' detection per size, shade, or combination.
  */
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
@@ -46,16 +43,75 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickViewProduct,
   onQuickAddToCart,
 }) => {
-  const [selectedColor, setSelectedColor] = useState<ProductColorVariant>(
-    product.colors[0]
+  const colorsWithStock = useMemo(
+    () => VariantStockService.getColorsWithStockStatus(product),
+    [product]
   );
-  const [selectedSize, setSelectedSize] = useState<ProductSizeOption>(
-    product.sizes.find((s) => s.inStock) ?? product.sizes[0]
+
+  const [selectedColorId, setSelectedColorId] = useState<string>(
+    () =>
+      colorsWithStock.find((c) => c.inStock)?.id ??
+      colorsWithStock[0]?.id ??
+      ''
   );
+
+  const activeColor = useMemo(
+    () =>
+      colorsWithStock.find((c) => c.id === selectedColorId) ??
+      colorsWithStock[0],
+    [colorsWithStock, selectedColorId]
+  );
+
+  const sizesForColor = useMemo(
+    () =>
+      VariantStockService.getSizesForSelectedColor(product, activeColor.id),
+    [product, activeColor.id]
+  );
+
+  const [selectedSizeLabel, setSelectedSizeLabel] = useState<string>(
+    () =>
+      sizesForColor.find((s) => s.inStock)?.label ??
+      sizesForColor[0]?.label ??
+      ''
+  );
+
+  const activeSize = useMemo(
+    () =>
+      sizesForColor.find((s) => s.label === selectedSizeLabel) ??
+      sizesForColor[0],
+    [sizesForColor, selectedSizeLabel]
+  );
+
   const [isHovered, setIsHovered] = useState(false);
 
-  const primaryImage = selectedColor.images[0];
-  const secondaryImage = selectedColor.images[1] ?? selectedColor.images[0];
+  const currentVariantStock = VariantStockService.getVariantStock(
+    product,
+    activeColor.id,
+    activeSize.label
+  );
+  const isCurrentVariantInStock = currentVariantStock > 0;
+  const isProductCompletelySoldOut =
+    VariantStockService.isProductSoldOut(product);
+
+  const primaryImage = activeColor.images[0];
+  const secondaryImage = activeColor.images[1] ?? activeColor.images[0];
+
+  const handleSelectColor = (color: ProductColorVariant) => {
+    setSelectedColorId(color.id);
+    const nextSizes = VariantStockService.getSizesForSelectedColor(
+      product,
+      color.id
+    );
+    const currentStillInStock = nextSizes.find(
+      (s) => s.label === selectedSizeLabel && s.inStock
+    );
+    if (!currentStillInStock) {
+      const firstAvailable = nextSizes.find((s) => s.inStock);
+      if (firstAvailable) {
+        setSelectedSizeLabel(firstAvailable.label);
+      }
+    }
+  };
 
   return (
     <article
@@ -71,7 +127,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div>
         {/* 1. Full-bleed 0px Editorial Photograph */}
         <div
-          onClick={() => onSelectProduct(product, selectedColor, selectedSize)}
+          onClick={() => onSelectProduct(product, activeColor, activeSize)}
           style={{
             position: 'relative',
             aspectRatio: '3 / 4',
@@ -83,7 +139,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         >
           <img
             src={isHovered ? secondaryImage : primaryImage}
-            alt={`${product.name} - ${selectedColor.name}`}
+            alt={`${product.name} - ${activeColor.name}`}
             loading="lazy"
             style={{
               width: '100%',
@@ -91,8 +147,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               objectFit: 'cover',
               transition: 'transform 0.45s ease',
               transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+              opacity: isProductCompletelySoldOut ? 0.65 : 1,
             }}
           />
+
+          {/* Top-Left Sold-Out Overlay Badge if entire product or current variant is out of stock */}
+          {!isCurrentVariantInStock && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                backgroundColor: 'var(--color-warm-charcoal)',
+                color: 'var(--color-pure-white)',
+                fontFamily: 'var(--font-gt-america-mono)',
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                padding: '4px 10px',
+                textTransform: 'uppercase',
+              }}
+            >
+              AGOTADO
+            </span>
+          )}
 
           {/* Top-Right Minimal Wishlist Toggle */}
           <button
@@ -131,7 +209,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              onQuickViewProduct(product, selectedColor, selectedSize);
+              onQuickViewProduct(product, activeColor, activeSize);
             }}
             className="text-caption-editorial"
             style={{
@@ -152,11 +230,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Bottom-Right Quick-Add '+' Glyph per DESIGN2.md */}
           <button
             type="button"
-            title="Añadir rápidamente a la bolsa"
+            disabled={!isCurrentVariantInStock}
+            title={
+              isCurrentVariantInStock
+                ? 'Añadir rápidamente a la bolsa'
+                : 'Variante agotada'
+            }
             aria-label={`Añadir ${product.name} a la bolsa`}
             onClick={(e) => {
               e.stopPropagation();
-              onQuickAddToCart(product, selectedColor, selectedSize);
+              if (isCurrentVariantInStock) {
+                onQuickAddToCart(product, activeColor, activeSize);
+              }
             }}
             style={{
               position: 'absolute',
@@ -174,16 +259,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer',
+              cursor: isCurrentVariantInStock ? 'pointer' : 'not-allowed',
+              opacity: isCurrentVariantInStock ? 1 : 0.4,
             }}
           >
-            +
+            {isCurrentVariantInStock ? '+' : '×'}
           </button>
         </div>
 
         {/* 2. Bare-White Spec Block Below Image */}
         <div>
-          {/* Product Name + Inline Signal Blue 'NEW IN' Badge per DESIGN2.md */}
           <div
             style={{
               display: 'flex',
@@ -194,9 +279,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             }}
           >
             <h3
-              onClick={() =>
-                onSelectProduct(product, selectedColor, selectedSize)
-              }
+              onClick={() => onSelectProduct(product, activeColor, activeSize)}
               style={{
                 fontFamily: 'var(--font-gt-america-mono)',
                 fontSize: '12px',
@@ -211,14 +294,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               {product.name}
             </h3>
 
-            {product.badge && (
-              <span className="badge-new-in" style={{ flexShrink: 0 }}>
-                {product.badge}
+            {isProductCompletelySoldOut ? (
+              <span
+                style={{
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '3px 7px',
+                  border: '1px solid var(--color-warm-charcoal)',
+                  color: 'var(--color-warm-charcoal)',
+                  flexShrink: 0,
+                }}
+              >
+                AGOTADO
               </span>
+            ) : (
+              product.badge && (
+                <span className="badge-new-in" style={{ flexShrink: 0 }}>
+                  {product.badge}
+                </span>
+              )
             )}
           </div>
 
-          {/* Price Row in GT America Mono 12px weight 400 (#151515) */}
+          {/* Price Row in COP */}
           <div
             style={{
               display: 'flex',
@@ -237,7 +336,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   color: 'var(--color-soft-black)',
                 }}
               >
-                {CurrencyService.formatUSD(product.price)}
+                {CurrencyService.formatCOP(product.price)}
               </span>
               {product.compareAtPrice && (
                 <span
@@ -249,7 +348,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     textDecoration: 'line-through',
                   }}
                 >
-                  {CurrencyService.formatUSD(product.compareAtPrice)}
+                  {CurrencyService.formatCOP(product.compareAtPrice)}
                 </span>
               )}
             </div>
@@ -271,9 +370,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             }}
           >
             <ColorSwatchSelector
-              colors={product.colors}
-              selectedColor={selectedColor}
-              onSelectColor={setSelectedColor}
+              colors={colorsWithStock}
+              selectedColor={activeColor}
+              onSelectColor={handleSelectColor}
               size="sm"
               labelPrefix={product.colorTypeLabel}
             />
@@ -288,20 +387,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 gap: '4px',
               }}
             >
-              {product.sizes.map((sizeOpt) => {
-                const isSelected = sizeOpt.label === selectedSize.label;
+              {sizesForColor.map((sizeOpt) => {
+                const isSelected = sizeOpt.label === activeSize.label;
                 return (
                   <button
                     key={sizeOpt.label}
                     type="button"
-                    disabled={!sizeOpt.inStock}
-                    onClick={() => setSelectedSize(sizeOpt)}
+                    onClick={() => setSelectedSizeLabel(sizeOpt.label)}
                     className={`pill-btn pill-btn--ghost ${
                       isSelected ? 'is-selected' : ''
                     }`}
                     style={{
                       padding: '4px 8px',
                       fontSize: '10px',
+                      opacity: sizeOpt.inStock ? 1 : 0.4,
                       textDecoration: sizeOpt.inStock ? 'none' : 'line-through',
                     }}
                   >
@@ -324,22 +423,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       >
         <button
           type="button"
-          onClick={() =>
-            onQuickAddToCart(product, selectedColor, selectedSize)
-          }
+          disabled={!isCurrentVariantInStock}
+          onClick={() => {
+            if (isCurrentVariantInStock) {
+              onQuickAddToCart(product, activeColor, activeSize);
+            }
+          }}
           className="pill-btn pill-btn--brand"
           style={{
             width: '100%',
             padding: '12px 16px',
             fontSize: '11px',
+            opacity: isCurrentVariantInStock ? 1 : 0.45,
+            cursor: isCurrentVariantInStock ? 'pointer' : 'not-allowed',
           }}
         >
-          ADD TO CART +
+          {isCurrentVariantInStock ? 'AÑADIR A LA BOLSA +' : 'AGOTADO'}
         </button>
 
         <button
           type="button"
-          onClick={() => onSelectProduct(product, selectedColor, selectedSize)}
+          onClick={() => onSelectProduct(product, activeColor, activeSize)}
           className="pill-btn pill-btn--outline"
           style={{
             padding: '12px 14px',

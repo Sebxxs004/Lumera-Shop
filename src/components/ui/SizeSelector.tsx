@@ -12,7 +12,8 @@ interface SizeSelectorProps {
 /**
  * SizeSelector
  * Single Responsibility: Sharp 0px spec-sheet selector for sizes or makeup presentations
- * per Skills/DESIGN2.md (GT America Mono 11-12px uppercase, #24170f selected fill).
+ * per Skills/DESIGN2.md (GT America Mono 11-12px uppercase, #24170f selected fill),
+ * showing explicit 'AGOTADO' status when stock is 0.
  */
 export const SizeSelector: React.FC<SizeSelectorProps> = ({
   sizes,
@@ -36,6 +37,19 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
           style={{ color: 'var(--color-soft-black)' }}
         >
           {labelPrefix}: <strong>{selectedSize.label}</strong>
+          {!selectedSize.inStock && (
+            <span
+              style={{
+                marginLeft: '8px',
+                padding: '2px 6px',
+                border: '1px solid var(--color-warm-charcoal)',
+                fontSize: '9px',
+                fontWeight: 700,
+              }}
+            >
+              AGOTADO
+            </span>
+          )}
         </span>
 
         {onOpenSizeGuide && (
@@ -65,14 +79,17 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
       >
         {sizes.map((size) => {
           const isSelected = size.label === selectedSize.label;
+          const isAvailable =
+            size.inStock &&
+            (typeof size.stock !== 'number' || size.stock > 0);
+
           return (
             <button
               key={size.label}
               type="button"
-              disabled={!size.inStock}
               onClick={() => onSelectSize(size)}
               style={{
-                padding: '10px 18px',
+                padding: '10px 16px',
                 fontFamily: 'var(--font-gt-america-mono)',
                 fontSize: '11px',
                 fontWeight: 'var(--font-weight-medium)',
@@ -87,12 +104,13 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
                 color: isSelected
                   ? 'var(--color-pure-white)'
                   : 'var(--color-soft-black)',
-                cursor: size.inStock ? 'pointer' : 'not-allowed',
-                opacity: size.inStock ? 1 : 0.3,
-                textDecoration: size.inStock ? 'none' : 'line-through',
+                cursor: 'pointer',
+                opacity: isAvailable ? 1 : 0.42,
+                textDecoration: isAvailable ? 'none' : 'line-through',
               }}
             >
               {size.label}
+              {!isAvailable ? ' · AGOTADO' : ''}
             </button>
           );
         })}
@@ -108,6 +126,9 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
           }}
         >
           SPEC: {selectedSize.measurementsOrDetail}
+          {typeof selectedSize.stock === 'number' && selectedSize.stock > 0 && (
+            <span> · DISPONIBLES: {selectedSize.stock} UDS.</span>
+          )}
         </p>
       )}
     </div>

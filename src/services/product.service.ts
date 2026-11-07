@@ -1,20 +1,80 @@
 import { CATEGORIES_DATA } from '../data/categories.data';
 import { PRODUCTS_DATA } from '../data/products.data';
+import { INITIAL_SUBCATEGORIES_SEED } from '../data/subcategories.data';
+import { PublicCatalogResponse } from '../types/admin.types';
 import {
   CategoryDefinition,
   Product,
   ProductCategorySlug,
   ProductFilterState,
+  SubcategoryDefinition,
 } from '../types/product.types';
+import { VariantStockService } from './variant-stock.service';
+
+type CatalogChangeListener = () => void;
+
+let currentProducts: Product[] = PRODUCTS_DATA.map((p) =>
+  VariantStockService.normalizeProductInventory(p)
+);
+let currentSubcategories: SubcategoryDefinition[] = [
+  ...INITIAL_SUBCATEGORIES_SEED,
+];
+let currentSignature = 'seed-unverified';
+const listeners = new Set<CatalogChangeListener>();
+
+function notifyCatalogListeners() {
+  listeners.forEach((listener) => listener());
+}
 
 /**
  * ProductService
- * Single Responsibility: Domain logic for querying, filtering, sorting, and relating products.
- * Ready to be replaced or extended with asynchronous HTTP repository calls when backend is added.
+ * Single Responsibility: Domain logic for querying, filtering, sorting, and relating products,
+ * synchronized with the signed `/api/v1/catalog` backend endpoint.
  */
 export const ProductService = {
+  subscribe(listener: CatalogChangeListener): () => void {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  },
+
+  async refreshFromBackend(): Promise<void> {
+    try {
+      const res = await fetch('/api/v1/catalog', {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as PublicCatalogResponse;
+      if (Array.isArray(data.products)) {
+        currentProducts = data.products
+          .filter((p) => p.isVisible !== false)
+          .map((p) => VariantStockService.normalizeProductInventory(p));
+      }
+      if (Array.isArray(data.subcategories)) {
+        currentSubcategories = data.subcategories.filter(
+          (s) => s.isVisible !== false
+        );
+      }
+      if (data.signature) {
+        currentSignature = data.signature;
+      }
+      notifyCatalogListeners();
+    } catch {
+      // Fallback to seeded memory if offline
+    }
+  },
+
+  getCatalogSignature(): string {
+    return currentSignature;
+  },
+
   getAllProducts(): Product[] {
-    return PRODUCTS_DATA;
+    return currentProducts;
+  },
+
+  getAllSubcategories(): SubcategoryDefinition[] {
+    return currentSubcategories;
   },
 
   getAllCategories(): CategoryDefinition[] {
@@ -28,27 +88,30 @@ export const ProductService = {
   },
 
   getProductById(productId: string): Product | undefined {
-    return PRODUCTS_DATA.find((item) => item.id === productId);
+    return currentProducts.find((item) => item.id === productId);
   },
 
   getRelatedProducts(product: Product): Product[] {
     const explicit = product.relatedProductIds
-      .map((id) => PRODUCTS_DATA.find((p) => p.id === id))
+      .map((id) => currentProducts.find((p) => p.id === id))
       .filter((p): p is Product => Boolean(p));
 
     if (explicit.length >= 3) {
       return explicit.slice(0, 3);
     }
 
-    const fallback = PRODUCTS_DATA.filter(
+    const fallback = currentProducts.filter(
       (p) => p.id !== product.id && !explicit.some((e) => e.id === p.id)
     );
 
     return [...explicit, ...fallback].slice(0, 3);
   },
 
-  getAvailableSizesForFilter(category: ProductCategorySlug, department: string): string[] {
-    const pool = PRODUCTS_DATA.filter((p) => {
+  getAvailableSizesForFilter(
+    category: ProductCategorySlug,
+    department: string
+  ): string[] {
+    const pool = currentProducts.filter((p) => {
       if (department !== 'all' && p.department !== department) return false;
       if (category !== 'all' && p.category !== category) return false;
       return true;
@@ -70,7 +133,7 @@ export const ProductService = {
     category: ProductCategorySlug,
     department: string
   ): Array<{ name: string; hex: string }> {
-    const pool = PRODUCTS_DATA.filter((p) => {
+    const pool = currentProducts.filter((p) => {
       if (department !== 'all' && p.department !== department) return false;
       if (category !== 'all' && p.category !== category) return false;
       return true;
@@ -85,13 +148,18 @@ export const ProductService = {
       });
     });
 
-    return Array.from(colorMap.entries()).map(([name, hex]) => ({ name, hex }));
+    return Array.from(colorMap.entries()).map(([name, hex]) => ({
+      name,
+      hex,
+    }));
   },
 
   filterAndSortProducts(filter: ProductFilterState): Product[] {
     const normalizedQuery = filter.searchQuery.trim().toLowerCase();
 
-    const filtered = PRODUCTS_DATA.filter((product) => {
+    const filtered = currentProducts.filter((product) => {
+      if (product.isVisible === false) return false;
+
       if (
         filter.department !== 'all' &&
         product.department !== filter.department
@@ -103,8 +171,10 @@ export const ProductService = {
         return false;
       }
 
-      if ( normalizedQuery.length > 0 ) {
-        const matchesName = product.name.toLowerCase().includes(normalizedQuery);
+      if (normalizedQuery.length > 0) {
+        const matchesName = product.name
+          .toLowerCase()
+          .includes(normalizedQuery);
         const matchesSubtitle = product.subtitle
           .toLowerCase()
           .includes(normalizedQuery);
@@ -114,16 +184,21 @@ export const ProductService = {
         const matchesColor = product.colors.some((c) =>
           c.name.toLowerCase().includes(normalizedQuery)
         );
-        if (!matchesName && !matchesSubtitle && !matchesCategory && !matchesColor) {
+        if (
+          !matchesName &&
+          !matchesSubtitle &&
+          !matchesCategory &&
+          !matchesColor
+        ) {
           return false;
         }
       }
 
       if (filter.selectedSize) {
-        const hasSize = product.sizes.some(
+        const hasSizeInStock = product.sizes.some(
           (s) => s.label === filter.selectedSize && s.inStock
         );
-        if (!hasSize) return false;
+        if (!hasSizeInStock) return false;
       }
 
       if (filter.selectedColorName) {
@@ -136,21 +211,26 @@ export const ProductService = {
       return true;
     });
 
-    return [...filtered].sort((a, b) => {
-      switch (filter.sortBy) {
-        case 'price-asc':
-          return a.price - b.price;
-        case 'price-desc':
-          return b.price - a.price;
-        case 'name-asc':
-          return a.name.localeCompare(b.name);
-        case 'newest':
-          return (b.badge === 'NEW IN' ? 1 : 0) - (a.badge === 'NEW IN' ? 1 : 0);
-        case 'featured':
-        default:
-          return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-      }
-    });
+    const sorted = [...filtered];
+    switch (filter.sortBy) {
+      case 'price-asc':
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case 'name-asc':
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'newest':
+        sorted.sort((a, b) => (b.badge === 'NEW IN' ? 1 : 0) - (a.badge === 'NEW IN' ? 1 : 0));
+        break;
+      case 'featured':
+      default:
+        sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        break;
+    }
+
+    return sorted;
   },
 };
-

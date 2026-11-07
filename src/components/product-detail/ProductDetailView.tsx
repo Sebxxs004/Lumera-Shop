@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   Check,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { CurrencyService } from '../../services/currency.service';
 import { ProductService } from '../../services/product.service';
+import { VariantStockService } from '../../services/variant-stock.service';
 import {
   Product,
   ProductColorVariant,
@@ -50,11 +51,27 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   onSelectRelatedProduct,
   onOpenSizeGuide,
 }) => {
-  const [selectedColor, setSelectedColor] = useState<ProductColorVariant>(
-    initialColor ?? product.colors[0]
+  const colorsWithStock = useMemo(
+    () => VariantStockService.getColorsWithStockStatus(product),
+    [product]
   );
+
+  const [selectedColor, setSelectedColor] = useState<ProductColorVariant>(
+    initialColor ??
+      colorsWithStock.find((c) => c.inStock) ??
+      colorsWithStock[0]
+  );
+
+  const sizesForColor = useMemo(
+    () =>
+      VariantStockService.getSizesForSelectedColor(product, selectedColor.id),
+    [product, selectedColor.id]
+  );
+
   const [selectedSize, setSelectedSize] = useState<ProductSizeOption>(
-    initialSize ?? product.sizes.find((s) => s.inStock) ?? product.sizes[0]
+    initialSize ??
+      sizesForColor.find((s) => s.inStock) ??
+      sizesForColor[0]
   );
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -63,22 +80,51 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   >('description');
   const [addedFeedback, setAddedFeedback] = useState(false);
 
+  const currentVariantStock = VariantStockService.getVariantStock(
+    product,
+    selectedColor.id,
+    selectedSize.label
+  );
+  const isCurrentVariantInStock = currentVariantStock > 0;
+
   useEffect(() => {
-    setSelectedColor(initialColor ?? product.colors[0]);
+    const nextColor =
+      initialColor ??
+      colorsWithStock.find((c) => c.inStock) ??
+      colorsWithStock[0];
+    setSelectedColor(nextColor);
+    const nextSizes = VariantStockService.getSizesForSelectedColor(
+      product,
+      nextColor.id
+    );
     setSelectedSize(
-      initialSize ?? product.sizes.find((s) => s.inStock) ?? product.sizes[0]
+      initialSize ??
+        nextSizes.find((s) => s.inStock) ??
+        nextSizes[0]
     );
     setActiveImageIndex(0);
     setQuantity(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [product, initialColor, initialSize]);
+  }, [product, initialColor, initialSize, colorsWithStock]);
 
   const handleColorChange = (color: ProductColorVariant) => {
     setSelectedColor(color);
     setActiveImageIndex(0);
+    const nextSizes = VariantStockService.getSizesForSelectedColor(
+      product,
+      color.id
+    );
+    const matching = nextSizes.find((s) => s.label === selectedSize.label);
+    if (matching && matching.inStock) {
+      setSelectedSize(matching);
+    } else {
+      setSelectedSize(nextSizes.find((s) => s.inStock) ?? nextSizes[0]);
+    }
+    setQuantity(1);
   };
 
   const handleAdd = () => {
+    if (!isCurrentVariantInStock) return;
     onAddToCart(product, selectedColor, selectedSize, quantity);
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 1800);
@@ -300,14 +346,16 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               className="text-caption-editorial"
               style={{ marginLeft: 'auto', color: 'var(--color-soft-black)' }}
             >
-              STATUS: IN STOCK
+              {isCurrentVariantInStock
+                ? `STATUS: EN STOCK (${currentVariantStock} UDS.)`
+                : 'STATUS: AGOTADO'}
             </span>
           </div>
 
           {/* 1. Selector de Color / Tono */}
           <div style={{ marginBottom: 'var(--spacing-24)' }}>
             <ColorSwatchSelector
-              colors={product.colors}
+              colors={colorsWithStock}
               selectedColor={selectedColor}
               onSelectColor={handleColorChange}
               size="md"
@@ -318,9 +366,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           {/* 2. Selector de Talla / Formato */}
           <div style={{ marginBottom: 'var(--spacing-24)' }}>
             <SizeSelector
-              sizes={product.sizes}
-              selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
+              sizes={sizesForColor}
+              selectedSize={
+                sizesForColor.find((s) => s.label === selectedSize.label) ??
+                selectedSize
+              }
+              onSelectSize={(s) => {
+                setSelectedSize(s);
+                setQuantity(1);
+              }}
               labelPrefix={product.sizeTypeLabel}
               onOpenSizeGuide={onOpenSizeGuide}
             />
@@ -374,14 +428,24 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               <button
                 type="button"
                 aria-label="Aumentar cantidad"
-                onClick={() => setQuantity((q) => q + 1)}
+                disabled={!isCurrentVariantInStock || quantity >= currentVariantStock}
+                onClick={() =>
+                  setQuantity((q) => Math.min(Math.max(1, currentVariantStock), q + 1))
+                }
                 style={{
                   background: 'none',
                   border: 'none',
                   color: 'var(--color-soft-black)',
-                  cursor: 'pointer',
+                  cursor:
+                    isCurrentVariantInStock && quantity < currentVariantStock
+                      ? 'pointer'
+                      : 'not-allowed',
                   padding: 'var(--spacing-8)',
                   display: 'flex',
+                  opacity:
+                    isCurrentVariantInStock && quantity < currentVariantStock
+                      ? 1
+                      : 0.35,
                 }}
               >
                 <Plus size={14} />
@@ -391,23 +455,28 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             {/* Warm Charcoal Primary CTA Button */}
             <button
               type="button"
+              disabled={!isCurrentVariantInStock}
               onClick={handleAdd}
               className="pill-btn pill-btn--brand"
               style={{
                 flex: 1,
                 minWidth: '210px',
                 height: '50px',
+                opacity: isCurrentVariantInStock ? 1 : 0.45,
+                cursor: isCurrentVariantInStock ? 'pointer' : 'not-allowed',
               }}
             >
-              {addedFeedback ? (
+              {!isCurrentVariantInStock ? (
+                <span>AGOTADO — SIN STOCK</span>
+              ) : addedFeedback ? (
                 <>
                   <Check size={15} />
-                  <span>ADDED TO CART</span>
+                  <span>AÑADIDO A LA BOLSA</span>
                 </>
               ) : (
                 <span>
-                  ADD TO CART —{' '}
-                  {CurrencyService.formatUSD(product.price * quantity)} +
+                  AÑADIR A LA BOLSA —{' '}
+                  {CurrencyService.formatCOP(product.price * quantity)} +
                 </span>
               )}
             </button>

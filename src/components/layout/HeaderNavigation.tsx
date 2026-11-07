@@ -6,6 +6,7 @@ import {
   NAVIGATION_SECTIONS,
   NavSectionId,
 } from '../../data/navigation.data';
+import { CurrencyService } from '../../services/currency.service';
 import { ProductService } from '../../services/product.service';
 import {
   Product,
@@ -144,11 +145,142 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     setIsMobileMenuOpen(false);
   };
 
-  const activeMegaMenuSection = hoveredSectionId
-    ? NAVIGATION_SECTIONS.find(
-        (sec) => sec.id === hoveredSectionId && sec.hasMegaMenu
-      ) ?? null
-    : null;
+  const activeMegaMenuSection = (() => {
+    if (!hoveredSectionId) return null;
+    const baseSec = NAVIGATION_SECTIONS.find(
+      (sec) => sec.id === hoveredSectionId && sec.hasMegaMenu
+    );
+    if (!baseSec) return null;
+
+    const liveSubs = ProductService.getAllSubcategories();
+    const liveProducts = ProductService.getAllProducts();
+
+    let dynamicSubItems: MegaMenuSubcategoryItem[] = [];
+    if (hoveredSectionId === 'ropa') {
+      dynamicSubItems = [
+        {
+          id: 'ropa-all',
+          label: 'VER TODA LA ROPA',
+          department: 'boutique',
+        },
+        ...liveSubs
+          .filter((s) => s.department === 'boutique' && s.isVisible)
+          .map((s) => ({
+            id: s.id,
+            label: s.label,
+            department: 'boutique' as const,
+            category: s.category,
+            searchQuery: s.searchKeyword || undefined,
+          })),
+        {
+          id: 'ropa-guia-tallas',
+          label: 'GUÍA DE TALLAS (ROPA)',
+          openSizeGuide: true,
+          isHighlight: true,
+        },
+      ];
+    } else if (hoveredSectionId === 'makeup') {
+      dynamicSubItems = [
+        {
+          id: 'mk-all',
+          label: 'VER TODO MAKEUP',
+          department: 'makeup',
+        },
+        ...liveSubs
+          .filter((s) => s.department === 'makeup' && s.isVisible)
+          .map((s) => ({
+            id: s.id,
+            label: s.label,
+            department: 'makeup' as const,
+            category: s.category,
+            searchQuery: s.searchKeyword || undefined,
+          })),
+        {
+          id: 'mk-guia-tonos',
+          label: 'GUÍA DE TONOS & ACABADOS',
+          openSizeGuide: true,
+          isHighlight: true,
+        },
+      ];
+    } else if (hoveredSectionId === 'recien-llegado') {
+      dynamicSubItems = [
+        {
+          id: 'rl-all',
+          label: 'VER TODO RECIÉN LLEGADO',
+          department: 'all',
+          category: 'all',
+        },
+        {
+          id: 'rl-ropa',
+          label: 'NUEVOS INGRESOS: ROPA',
+          department: 'boutique',
+        },
+        {
+          id: 'rl-makeup',
+          label: 'NUEVOS INGRESOS: MAKEUP',
+          department: 'makeup',
+        },
+        ...liveSubs
+          .filter((s) => s.showInNewArrivals && s.isVisible)
+          .map((s) => ({
+            id: `rl-${s.id}`,
+            label: s.label,
+            department: s.department,
+            category: s.category,
+            searchQuery: s.searchKeyword || undefined,
+          })),
+      ];
+    }
+
+    // Build dynamic featured cards from live products matching the section
+    const deptFilter =
+      hoveredSectionId === 'ropa'
+        ? 'boutique'
+        : hoveredSectionId === 'makeup'
+        ? 'makeup'
+        : 'all';
+
+    const candidateProducts = liveProducts.filter((p) =>
+      deptFilter === 'all' ? true : p.department === deptFilter
+    );
+    const featuredPool = [
+      ...candidateProducts.filter((p) => p.badge === 'BESTSELLER' || p.featured),
+      ...candidateProducts,
+    ];
+    const uniqueFeatured: Product[] = [];
+    for (const prod of featuredPool) {
+      if (!uniqueFeatured.some((u) => u.id === prod.id)) {
+        uniqueFeatured.push(prod);
+      }
+      if (uniqueFeatured.length >= 3) break;
+    }
+
+    const dynamicCards: MegaMenuFeaturedCard[] =
+      uniqueFeatured.length === 3
+        ? uniqueFeatured.map((p, idx) => ({
+            id: `dyn-card-${p.id}`,
+            editorialTitle:
+              idx === 0
+                ? 'LO MÁS VENDIDO'
+                : idx === 1
+                ? 'DESTACADO ATELIER'
+                : 'RECIÉN LLEGADO',
+            subtitle: `${p.name} — ${CurrencyService.formatCOP(p.price)}`,
+            badge: p.badge ?? 'MÁS VENDIDO',
+            image:
+              p.colors[0]?.images[0] ??
+              'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1000&q=85',
+            productId: p.id,
+          }))
+        : baseSec.featuredCards;
+
+    return {
+      ...baseSec,
+      subcategories:
+        dynamicSubItems.length > 0 ? dynamicSubItems : baseSec.subcategories,
+      featuredCards: dynamicCards,
+    };
+  })();
 
   const iconBtnStyle: React.CSSProperties = {
     background: 'none',

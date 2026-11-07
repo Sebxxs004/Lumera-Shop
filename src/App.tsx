@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AdminConsoleView } from './components/admin/AdminConsoleView';
 import { CartDrawer } from './components/cart/CartDrawer';
 import { CategoryFilterBar } from './components/catalog/CategoryFilterBar';
 import { ProductGrid } from './components/catalog/ProductGrid';
@@ -25,6 +26,26 @@ import {
 } from './types/product.types';
 
 export const App: React.FC = () => {
+  const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    return path === '/atelier-admin' || hash === '#/atelier-admin';
+  });
+
+  useEffect(() => {
+    const syncRoute = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      setIsAdminRoute(path === '/atelier-admin' || hash === '#/atelier-admin');
+    };
+    window.addEventListener('popstate', syncRoute);
+    window.addEventListener('hashchange', syncRoute);
+    return () => {
+      window.removeEventListener('popstate', syncRoute);
+      window.removeEventListener('hashchange', syncRoute);
+    };
+  }, []);
+
   const {
     filters,
     filteredProducts,
@@ -134,6 +155,18 @@ export const App: React.FC = () => {
   ) => {
     setSelectedProductState({ product, initialColor, initialSize });
   };
+
+  if (isAdminRoute) {
+    return (
+      <AdminConsoleView
+        onExitToStorefront={() => {
+          window.history.pushState({}, '', '/');
+          setIsAdminRoute(false);
+          void ProductService.refreshFromBackend();
+        }}
+      />
+    );
+  }
 
   return (
     <div
