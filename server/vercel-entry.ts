@@ -1,9 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { ApiRouter } from '../server/router/api.router';
+import { ApiRouter } from './router/api.router';
 
 /**
- * Vercel Serverless Function Entrypoint (`/api/v1/*`)
- * Single Responsibility: Forwards all `/api/v1/*` requests on Vercel to `ApiRouter`.
+ * Vercel Serverless Function Source Entrypoint (`/api/v1/*`)
+ * Bundled into `api/index.js` so Vercel executes a self-contained ESM module.
  */
 export default async function handler(
   req: IncomingMessage,

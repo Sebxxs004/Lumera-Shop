@@ -30,6 +30,24 @@ function sendJson(
 function readJsonBody<T = Record<string, unknown>>(
   req: IncomingMessage
 ): Promise<T> {
+  const preParsed = (req as IncomingMessage & { body?: unknown }).body;
+  if (preParsed !== undefined && preParsed !== null) {
+    if (typeof preParsed === 'string') {
+      try {
+        return Promise.resolve(
+          (preParsed.trim() ? JSON.parse(preParsed) : {}) as T
+        );
+      } catch {
+        return Promise.reject(
+          new Error('JSON inválido en el cuerpo de la petición.')
+        );
+      }
+    }
+    if (typeof preParsed === 'object') {
+      return Promise.resolve(preParsed as T);
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let totalBytes = 0;
@@ -73,11 +91,19 @@ export const ApiRouter = {
     res: ServerResponse
   ): Promise<boolean> {
     const rawUrl = req.url ?? '';
-    if (!rawUrl.startsWith('/api/v1/')) {
+    const initialUrlObj = new URL(rawUrl || '/', 'http://localhost');
+    const rewrittenRoute = initialUrlObj.searchParams.get('__route');
+    const effectiveUrl = rewrittenRoute
+      ? rewrittenRoute.startsWith('/')
+        ? rewrittenRoute
+        : `/api/v1/${rewrittenRoute}`
+      : rawUrl;
+
+    if (!effectiveUrl.startsWith('/api/v1/')) {
       return false;
     }
 
-    const urlObj = new URL(rawUrl, 'http://localhost');
+    const urlObj = new URL(effectiveUrl, 'http://localhost');
     const pathname = urlObj.pathname;
     const method = (req.method ?? 'GET').toUpperCase();
 

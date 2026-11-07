@@ -9,6 +9,24 @@ import { ProductService } from './product.service';
 
 const TOKEN_STORAGE_KEY = 'lumera_atelier_jwt_v1';
 
+function extractErrorMessage(
+  rawError: unknown,
+  fallbackMessage: string
+): string {
+  if (typeof rawError === 'string' && rawError.trim()) {
+    return rawError;
+  }
+  if (
+    rawError &&
+    typeof rawError === 'object' &&
+    'message' in rawError &&
+    typeof (rawError as { message?: unknown }).message === 'string'
+  ) {
+    return (rawError as { message: string }).message;
+  }
+  return fallbackMessage;
+}
+
 async function safeReadJson<T>(
   res: Response
 ): Promise<{ parsed: T | null; isStaticOrMissingApi: boolean }> {
@@ -16,6 +34,7 @@ async function safeReadJson<T>(
   if (
     res.status === 405 ||
     res.status === 404 ||
+    res.status >= 500 ||
     contentType.includes('text/html')
   ) {
     return { parsed: null, isStaticOrMissingApi: true };
@@ -26,7 +45,8 @@ async function safeReadJson<T>(
     if (!text.trim()) {
       return {
         parsed: null,
-        isStaticOrMissingApi: res.status === 405 || res.status === 404,
+        isStaticOrMissingApi:
+          res.status === 405 || res.status === 404 || res.status >= 500,
       };
     }
     return {
@@ -108,7 +128,9 @@ export const AdminApiService = {
       }
 
       if (!res.ok || !parsed?.token) {
-        throw new Error(parsed?.error ?? 'Error al iniciar sesión.');
+        throw new Error(
+          extractErrorMessage(parsed?.error, 'Error al iniciar sesión.')
+        );
       }
 
       this.setStoredToken(parsed.token);
@@ -179,7 +201,10 @@ export const AdminApiService = {
 
       if (!res.ok || !parsed) {
         throw new Error(
-          parsed?.error ?? 'No se pudo cargar el catálogo de administración.'
+          extractErrorMessage(
+            parsed?.error,
+            'No se pudo cargar el catálogo de administración.'
+          )
         );
       }
       return parsed;
