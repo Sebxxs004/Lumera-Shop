@@ -9,11 +9,11 @@ import {
 import { PillDropdown, PillDropdownOption } from '../ui/PillDropdown';
 
 const SORT_OPTIONS: PillDropdownOption<SortOption>[] = [
-  { value: 'featured', label: 'ORDENAR: DESTACADOS' },
-  { value: 'newest', label: 'ORDENAR: NUEVOS INGRESOS' },
-  { value: 'price-asc', label: 'PRECIO: MENOR A MAYOR' },
-  { value: 'price-desc', label: 'PRECIO: MAYOR A MENOR' },
-  { value: 'name-asc', label: 'NOMBRE: A - Z' },
+  { value: 'featured', label: 'SORT: FEATURED' },
+  { value: 'newest', label: 'SORT: NEW IN' },
+  { value: 'price-asc', label: 'PRICE: LOW — HIGH' },
+  { value: 'price-desc', label: 'PRICE: HIGH — LOW' },
+  { value: 'name-asc', label: 'NAME: A — Z' },
 ];
 
 interface CategoryFilterBarProps {
@@ -36,8 +36,8 @@ interface CategoryFilterBarProps {
 
 /**
  * CategoryFilterBar
- * Single Responsibility: Responsive category pill bar, search input, attribute filters
- * (talla/formato & color/tono), and custom sort dropdown on a soft pastel background.
+ * Single Responsibility: Architectural spec-sheet filter bar per Skills/DESIGN2.md
+ * (0px sharp edges, GT America Mono 10-11px uppercase, #24170f filled active states).
  */
 export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
   categories,
@@ -63,15 +63,13 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
       id="catalog-section"
       style={{
         marginBottom: 'var(--spacing-40)',
-        backgroundColor: 'var(--color-lumera-pastel-soft)',
-        border: '1px solid var(--color-lumera-mist)',
-        borderRadius: 'var(--radius-cards)',
-        padding: 'var(--spacing-20)',
+        borderTop: '1px solid var(--color-warm-charcoal)',
+        borderBottom: '1px solid var(--color-warm-charcoal)',
+        padding: 'var(--spacing-16) 0',
       }}
     >
-      {/* Primary Row: Category Pill Tabs + Filter/Sort Controls */}
+      {/* Primary Row: Category Tabs + Filter/Sort Controls */}
       <div className="filter-bar-header">
-        {/* Horizontally scrollable on mobile, wrapped on desktop */}
         <div
           role="tablist"
           aria-label="Categorías de productos"
@@ -94,8 +92,9 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
                   isActive ? 'pill-btn--brand' : 'pill-btn--outline'
                 }`}
                 style={{
-                  padding: 'var(--spacing-10) var(--spacing-20)',
-                  fontSize: 'var(--text-caption)',
+                  padding: '10px 18px',
+                  fontSize: '10px',
+                  letterSpacing: '0.093em',
                   flexShrink: 0,
                 }}
               >
@@ -105,15 +104,16 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
           })}
         </div>
 
-        {/* Right Controls: Filter Toggle + Sort Pill Dropdown */}
+        {/* Right Controls: Item Count + Filter Drawer Trigger + Custom Sort Dropdown */}
         <div className="filter-controls-group">
           <span
-            className="pill-tag"
+            className="text-caption-editorial"
             style={{
-              padding: '7px 14px',
+              color: 'var(--color-soft-black)',
+              padding: '0 6px',
             }}
           >
-            {totalResults} {totalResults === 1 ? 'PIEZA' : 'PIEZAS'}
+            [{totalResults} {totalResults === 1 ? 'ITEM' : 'ITEMS'}]
           </span>
 
           <button
@@ -127,12 +127,13 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
                 : 'pill-btn--outline'
             }`}
             style={{
-              padding: 'var(--spacing-10) var(--spacing-20)',
-              fontSize: 'var(--text-caption)',
+              padding: '10px 18px',
+              fontSize: '10px',
+              letterSpacing: '0.093em',
             }}
           >
-            <SlidersHorizontal size={14} />
-            <span>TALLAS &amp; COLORES</span>
+            <SlidersHorizontal size={12} />
+            <span>FILTER: TALLAS &amp; COLORES</span>
           </button>
 
           <PillDropdown
@@ -148,7 +149,7 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
       {(isSearchExpanded || filters.searchQuery.length > 0) && (
         <div
           style={{
-            marginTop: 'var(--spacing-20)',
+            marginTop: 'var(--spacing-16)',
             position: 'relative',
           }}
         >
@@ -156,7 +157,7 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
             type="search"
             value={filters.searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar por prenda, maquillaje, tono (ej. Satén, Corset, Lip Oil, Rosa)..."
+            placeholder="BUSCAR POR PRENDA, MAQUILLAJE, SKU O TONO..."
             className="pill-input"
           />
           {filters.searchQuery && (
@@ -166,28 +167,28 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
               aria-label="Limpiar búsqueda"
               style={{
                 position: 'absolute',
-                right: 'var(--spacing-20)',
+                right: 'var(--spacing-16)',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
-                color: 'var(--color-lumera-statement)',
+                color: 'var(--color-soft-black)',
                 cursor: 'pointer',
               }}
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           )}
         </div>
       )}
 
-      {/* Expandable Drawer for Size/Presentation & Color/Shade Filters */}
+      {/* Expandable Spec Panel for Size/Format & Color/Shade Filters */}
       {showAdvancedFilters && (
         <div
           style={{
-            marginTop: 'var(--spacing-20)',
-            paddingTop: 'var(--spacing-20)',
-            borderTop: '1px solid var(--color-lumera-mist)',
+            marginTop: 'var(--spacing-16)',
+            padding: 'var(--spacing-20)',
+            backgroundColor: 'var(--color-ash-gray)',
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: 'var(--spacing-24)',
@@ -198,17 +199,17 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
             <p
               className="text-caption-editorial"
               style={{
-                color: 'var(--color-lumera-statement)',
-                marginBottom: 'var(--spacing-10)',
+                color: 'var(--color-soft-black)',
+                marginBottom: 'var(--spacing-8)',
               }}
             >
-              FILTRAR POR TALLA O FORMATO DISPONIBLE
+              01 // FILTER BY SIZE OR FORMAT
             </p>
             <div
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: 'var(--spacing-8)',
+                gap: '6px',
               }}
             >
               {availableSizes.map((size) => {
@@ -234,17 +235,17 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
             <p
               className="text-caption-editorial"
               style={{
-                color: 'var(--color-lumera-statement)',
-                marginBottom: 'var(--spacing-10)',
+                color: 'var(--color-soft-black)',
+                marginBottom: 'var(--spacing-8)',
               }}
             >
-              FILTRAR POR COLOR O TONO DE MAQUILLAJE
+              02 // FILTER BY COLOR OR SHADE
             </p>
             <div
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: 'var(--spacing-8)',
+                gap: '6px',
               }}
             >
               {availableColors.map((color) => {
@@ -260,11 +261,10 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
                   >
                     <span
                       style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 'var(--radius-full)',
+                        width: 10,
+                        height: 10,
                         backgroundColor: color.hex,
-                        border: '1px solid var(--color-lumera-mist)',
+                        border: '1px solid var(--color-soft-black)',
                         display: 'inline-block',
                       }}
                     />
@@ -281,28 +281,28 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
       {(hasActiveFilters || showingWishlistOnly) && (
         <div
           style={{
-            marginTop: 'var(--spacing-16)',
+            marginTop: 'var(--spacing-12)',
             display: 'flex',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: 'var(--spacing-10)',
+            gap: 'var(--spacing-8)',
           }}
         >
           <span
             className="text-caption-editorial"
-            style={{ color: 'var(--color-lumera-statement)' }}
+            style={{ color: 'var(--color-soft-black)' }}
           >
-            FILTROS ACTIVOS:
+            ACTIVE FILTERS:
           </span>
 
           {showingWishlistOnly && (
             <button
               type="button"
               onClick={onClearWishlistFilter}
-              className="pill-tag pill-tag--outline"
+              className="badge-new-in"
               style={{ cursor: 'pointer' }}
             >
-              SOLO FAVORITOS ✕
+              SAVED ITEMS ONLY [X]
             </button>
           )}
 
@@ -310,10 +310,10 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
             <button
               type="button"
               onClick={() => onToggleSize(filters.selectedSize!)}
-              className="pill-tag pill-tag--outline"
+              className="badge-new-in"
               style={{ cursor: 'pointer' }}
             >
-              TALLA/FORMATO: {filters.selectedSize} ✕
+              SIZE: {filters.selectedSize} [X]
             </button>
           )}
 
@@ -321,10 +321,10 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
             <button
               type="button"
               onClick={() => onToggleColor(filters.selectedColorName!)}
-              className="pill-tag pill-tag--outline"
+              className="badge-new-in"
               style={{ cursor: 'pointer' }}
             >
-              COLOR/TONO: {filters.selectedColorName} ✕
+              COLOR: {filters.selectedColorName} [X]
             </button>
           )}
 
@@ -338,13 +338,13 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--color-lumera-statement)',
+              color: 'var(--color-soft-black)',
               textDecoration: 'underline',
               cursor: 'pointer',
               marginLeft: 'var(--spacing-8)',
             }}
           >
-            LIMPIAR TODO
+            RESET ALL
           </button>
         </div>
       )}

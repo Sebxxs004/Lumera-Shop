@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Menu, Ruler, Search, ShoppingBag, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { ProductCategorySlug, ProductDepartment } from '../../types/product.types';
 
 interface HeaderNavigationProps {
@@ -19,9 +19,10 @@ interface HeaderNavigationProps {
 
 /**
  * HeaderNavigation
- * Single Responsibility: Responsive primary site navigation.
- * Desktop: Left nav links, Center LUMERA-PNG.png logo, Right utility icons.
- * Mobile: Left Hamburger drawer trigger, Center logo, Right utility icons + Pastel Mobile Menu Drawer.
+ * Single Responsibility: Persistent architectural top navigation per Skills/DESIGN2.md
+ * - Logo mark (/assets/LUMERA-PNG.png in dark tone) far left
+ * - Navigation & utility links far right in GT America Mono 11px weight 500,
+ *   letter-spacing 0.071em uppercase, #151515 on #ffffff canvas.
  */
 export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   activeDepartment,
@@ -45,7 +46,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     onClick: () => void;
   }> = [
     {
-      label: 'Colección',
+      label: 'SHOP ALL',
       isActive:
         activeDepartment === 'all' &&
         activeCategory === 'all' &&
@@ -56,7 +57,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
       },
     },
     {
-      label: 'Moda Boutique',
+      label: 'MODA BOUTIQUE',
       isActive: activeDepartment === 'boutique' && !showingWishlistOnly,
       onClick: () => {
         onSelectDepartment('boutique');
@@ -64,7 +65,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
       },
     },
     {
-      label: 'Maquillaje',
+      label: 'MAQUILLAJE',
       isActive: activeDepartment === 'makeup' && !showingWishlistOnly,
       onClick: () => {
         onSelectDepartment('makeup');
@@ -72,7 +73,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
       },
     },
     {
-      label: 'Vestidos & Sets',
+      label: 'VESTIDOS & SETS',
       isActive:
         activeCategory === 'vestidos-conjuntos' && !showingWishlistOnly,
       onClick: () => {
@@ -82,225 +83,166 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
     },
   ];
 
+  const monoLinkStyle = (isActive = false): React.CSSProperties => ({
+    background: 'none',
+    border: 'none',
+    borderBottom: isActive
+      ? '1px solid var(--color-soft-black)'
+      : '1px solid transparent',
+    padding: '4px 0',
+    fontFamily: 'var(--font-gt-america-mono)',
+    fontSize: '11px',
+    fontWeight: 'var(--font-weight-medium)',
+    letterSpacing: '0.071em',
+    textTransform: 'uppercase',
+    color: 'var(--color-soft-black)',
+    cursor: 'pointer',
+  });
+
   return (
     <header
       style={{
-        backgroundColor: 'var(--surface-paper-white-canvas)',
-        borderBottom: '1px solid var(--color-lumera-pastel)',
-        padding: 'var(--spacing-16) 0',
+        backgroundColor: 'var(--color-pure-white)',
+        borderBottom: '1px solid var(--color-warm-charcoal)',
+        padding: '16px 0',
         position: 'sticky',
         top: 0,
         zIndex: 80,
       }}
     >
       <div className="lumera-container header-grid">
-        {/* Left: Desktop Links OR Mobile Menu Button */}
-        <div>
+        {/* Far Left: Dark Logo Mark (/assets/LUMERA-PNG.png) */}
+        <button
+          type="button"
+          onClick={() => {
+            onSelectDepartment('all');
+            setIsMobileMenuOpen(false);
+          }}
+          aria-label="Ir al inicio de LUMÉRA"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src="/assets/LUMERA-PNG.png"
+            alt="LUMÉRA"
+            style={{
+              height: 'clamp(30px, 4.2vw, 44px)',
+              width: 'auto',
+              objectFit: 'contain',
+            }}
+          />
+        </button>
+
+        {/* Far Right: Architectural Monospace Navigation & Utility Links */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(14px, 2.2vw, 28px)',
+          }}
+        >
           <nav aria-label="Navegación principal" className="desktop-nav">
             {navItems.map((item) => (
               <button
                 key={item.label}
                 type="button"
                 onClick={item.onClick}
-                style={{
-                  background: item.isActive
-                    ? 'var(--color-lumera-pastel)'
-                    : 'none',
-                  border: 'none',
-                  borderRadius: 'var(--radius-tags)',
-                  padding: '6px 14px',
-                  fontFamily: 'var(--font-soehne)',
-                  fontSize: 'var(--text-body-sm)',
-                  fontWeight: item.isActive
-                    ? 'var(--font-weight-bold)'
-                    : 'var(--font-weight-regular)',
-                  letterSpacing: 'var(--tracking-body-sm)',
-                  color: 'var(--color-lumera-statement)',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease',
-                }}
+                style={monoLinkStyle(item.isActive)}
               >
                 {item.label}
               </button>
             ))}
+
+            <button
+              type="button"
+              onClick={onOpenSizeGuide}
+              style={monoLinkStyle(false)}
+            >
+              SIZE SPEC
+            </button>
           </nav>
 
-          {/* Mobile Menu Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            aria-label="Abrir menú de navegación"
-            className="mobile-menu-trigger pill-btn pill-btn--pastel"
+          {/* Utility Text Links per DESIGN2.md */}
+          <div
             style={{
-              padding: '8px 14px',
-            }}
-          >
-            {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-            <span style={{ fontSize: '11px' }}>MENÚ</span>
-          </button>
-        </div>
-
-        {/* Center Logo Mark: assets/LUMERA-PNG.png */}
-        <div style={{ textAlign: 'center' }}>
-          <button
-            type="button"
-            onClick={() => {
-              onSelectDepartment('all');
-              setIsMobileMenuOpen(false);
-            }}
-            aria-label="Ir al inicio de LUMÉRA"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
+              gap: 'clamp(12px, 1.8vw, 22px)',
             }}
           >
-            <img
-              src="/assets/LUMERA-PNG.png"
-              alt="LUMÉRA"
+            <button
+              type="button"
+              onClick={onToggleSearch}
+              style={monoLinkStyle(isSearchOpen)}
+            >
+              SEARCH
+            </button>
+
+            <button
+              type="button"
+              onClick={onFilterWishlistedOnly}
+              style={monoLinkStyle(showingWishlistOnly)}
+            >
+              SAVED ({wishlistCount})
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenCart}
               style={{
-                height: 'clamp(34px, 5vw, 56px)',
-                width: 'auto',
-                objectFit: 'contain',
-              }}
-            />
-          </button>
-        </div>
-
-        {/* Right Utility Icons */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            gap: 'clamp(10px, 2vw, 20px)',
-          }}
-        >
-          <button
-            type="button"
-            onClick={onToggleSearch}
-            title="Buscar piezas o tonos"
-            aria-label="Buscar productos"
-            style={{
-              background: isSearchOpen
-                ? 'var(--color-lumera-pastel)'
-                : 'none',
-              border: 'none',
-              borderRadius: 'var(--radius-full)',
-              padding: '6px',
-              color: 'var(--color-lumera-statement)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-            }}
-          >
-            <Search size={20} strokeWidth={1.9} />
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenSizeGuide}
-            title="Guía de Tallas y Tonos"
-            aria-label="Abrir guía de tallas y tonos"
-            className="desktop-nav"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--color-lumera-statement)',
-              cursor: 'pointer',
-            }}
-          >
-            <Ruler size={20} strokeWidth={1.9} />
-          </button>
-
-          <button
-            type="button"
-            onClick={onFilterWishlistedOnly}
-            title="Ver favoritos guardados"
-            aria-label="Favoritos"
-            style={{
-              background: showingWishlistOnly
-                ? 'var(--color-lumera-pastel)'
-                : 'none',
-              border: 'none',
-              borderRadius: 'var(--radius-tags)',
-              padding: '6px',
-              color: 'var(--color-lumera-statement)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <Heart
-              size={20}
-              strokeWidth={1.9}
-              fill={
-                showingWishlistOnly ? 'var(--color-lumera-statement)' : 'none'
-              }
-            />
-            {wishlistCount > 0 && (
-              <span
-                className="text-caption-editorial"
-                style={{
-                  color: 'var(--color-lumera-statement)',
-                  fontSize: '10px',
-                }}
-              >
-                {wishlistCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenCart}
-            title="Abrir bolsa de compras"
-            aria-label="Bolsa de compras"
-            style={{
-              backgroundColor: 'var(--color-lumera-pastel)',
-              border: '1px solid var(--color-lumera-mist)',
-              borderRadius: 'var(--radius-tags)',
-              padding: '6px 12px',
-              color: 'var(--color-lumera-statement)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <ShoppingBag size={18} strokeWidth={1.9} />
-            <span
-              className="text-caption-editorial"
-              style={{
-                color: 'var(--color-lumera-statement)',
-                fontSize: '11px',
+                ...monoLinkStyle(false),
+                backgroundColor: 'var(--color-warm-charcoal)',
+                color: 'var(--color-pure-white)',
+                padding: '6px 12px',
               }}
             >
-              {cartCount}
-            </span>
-          </button>
+              CART ({cartCount})
+            </button>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              aria-label="Abrir menú"
+              className="mobile-menu-trigger"
+              style={{
+                background: 'none',
+                border: '1px solid var(--color-warm-charcoal)',
+                padding: '6px 10px',
+                color: 'var(--color-soft-black)',
+                cursor: 'pointer',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '10px',
+                letterSpacing: '0.093em',
+              }}
+            >
+              {isMobileMenuOpen ? <X size={15} /> : <Menu size={15} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Collapsible Mobile Drawer */}
+      {/* Architectural Mobile Menu Drawer */}
       {isMobileMenuOpen && (
         <div
           style={{
-            backgroundColor: 'var(--color-lumera-pastel-soft)',
-            borderTop: '1px solid var(--color-lumera-mist)',
-            borderBottom: '1px solid var(--color-lumera-mist)',
+            backgroundColor: 'var(--color-pure-white)',
+            borderTop: '1px solid var(--color-warm-charcoal)',
             padding: 'var(--spacing-20) var(--spacing-16)',
-            marginTop: 'var(--spacing-12)',
+            marginTop: 'var(--spacing-16)',
           }}
         >
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 'var(--spacing-10)',
+              gap: 'var(--spacing-8)',
             }}
           >
             {navItems.map((item) => (
@@ -317,7 +259,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
                 }}
               >
                 <span>{item.label}</span>
-                <span>→</span>
+                <span>+</span>
               </button>
             ))}
 
@@ -327,14 +269,14 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
                 setIsMobileMenuOpen(false);
                 onOpenSizeGuide();
               }}
-              className="pill-btn pill-btn--pastel"
+              className="pill-btn pill-btn--outline"
               style={{
                 width: '100%',
-                marginTop: 'var(--spacing-6)',
+                justifyContent: 'space-between',
               }}
             >
-              <Ruler size={16} />
-              <span>GUÍA DE TALLAS, MEDIDAS &amp; TONOS</span>
+              <span>GUÍA DE MEDIDAS &amp; TONOS [SPEC]</span>
+              <span>+</span>
             </button>
           </div>
         </div>

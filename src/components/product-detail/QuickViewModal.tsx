@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, Check, ShoppingBag, X } from 'lucide-react';
+import { ArrowUpRight, Check, X } from 'lucide-react';
 import { CurrencyService } from '../../services/currency.service';
 import {
   Product,
@@ -30,8 +30,7 @@ interface QuickViewModalProps {
 
 /**
  * QuickViewModal
- * Single Responsibility: Floating editorial modal allowing users to inspect
- * colors/shades, sizes/formats, and measurements without losing catalog scroll position.
+ * Single Responsibility: Sharp 0px architectural quick-spec modal per Skills/DESIGN2.md.
  */
 export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   product,
@@ -78,19 +77,18 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 105,
-        backgroundColor: 'rgba(27, 27, 27, 0.62)',
+        backgroundColor: 'rgba(21, 21, 21, 0.72)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 'var(--spacing-20)',
+        padding: 'var(--spacing-16)',
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'var(--surface-paper-white-canvas)',
-          border: '2px solid var(--color-lumera-statement)',
-          borderRadius: 'var(--radius-cards)',
+          backgroundColor: 'var(--color-pure-white)',
+          border: '1px solid var(--color-warm-charcoal)',
           maxWidth: '860px',
           width: '100%',
           maxHeight: '90vh',
@@ -104,7 +102,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           style={{
             position: 'relative',
             minHeight: '360px',
-            backgroundColor: 'var(--surface-fog-footer)',
+            backgroundColor: 'var(--color-ash-gray)',
           }}
         >
           <img
@@ -120,19 +118,20 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             <div
               style={{
                 position: 'absolute',
-                top: 'var(--spacing-15)',
-                left: 'var(--spacing-15)',
+                top: '12px',
+                left: '12px',
+                backgroundColor: 'var(--color-pure-white)',
               }}
             >
-              <span className="pill-tag">{product.badge}</span>
+              <span className="badge-new-in">{product.badge}</span>
             </div>
           )}
         </div>
 
-        {/* Right: Quick Configuration */}
+        {/* Right: Quick Spec Sheet */}
         <div
           style={{
-            padding: 'var(--card-padding)',
+            padding: 'var(--spacing-24)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -151,9 +150,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             >
               <span
                 className="text-caption-editorial"
-                style={{ color: 'var(--color-lumera-statement)' }}
+                style={{ color: 'var(--color-soft-black)' }}
               >
-                {product.categoryLabel} · {product.sku}
+                {product.categoryLabel} // {product.sku}
               </span>
 
               <button
@@ -161,9 +160,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 onClick={onClose}
                 aria-label="Cerrar vista rápida"
                 className="pill-btn pill-btn--outline"
-                style={{ padding: '6px 12px' }}
+                style={{ padding: '6px 10px' }}
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             </div>
 
@@ -177,8 +176,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             <p
               className="text-body-sm-editorial"
               style={{
-                color: 'var(--color-carbon)',
-                marginBottom: 'var(--spacing-15)',
+                color: 'var(--color-soft-black)',
+                marginBottom: 'var(--spacing-16)',
               }}
             >
               {product.description}
@@ -186,12 +185,13 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
 
             <div
               style={{
-                fontFamily: 'var(--font-integral)',
-                fontSize: '28px',
-                color: 'var(--color-lumera-statement)',
+                fontFamily: 'var(--font-gt-america-mono)',
+                fontSize: '18px',
+                fontWeight: 'var(--font-weight-medium)',
+                color: 'var(--color-soft-black)',
                 marginBottom: 'var(--spacing-20)',
-                paddingBottom: 'var(--spacing-15)',
-                borderBottom: '1px solid var(--color-lumera-mist)',
+                paddingBottom: 'var(--spacing-12)',
+                borderBottom: '1px solid var(--color-warm-charcoal)',
               }}
             >
               {CurrencyService.formatUSD(product.price)}
@@ -221,9 +221,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 'var(--spacing-10)',
-              paddingTop: 'var(--spacing-15)',
-              borderTop: '1px solid var(--color-lumera-mist)',
+              gap: 'var(--spacing-8)',
+              paddingTop: 'var(--spacing-16)',
+              borderTop: '1px solid var(--color-ash-gray)',
             }}
           >
             <button
@@ -234,16 +234,13 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             >
               {added ? (
                 <>
-                  <Check size={16} />
-                  <span>AÑADIDO A LA BOLSA</span>
+                  <Check size={14} />
+                  <span>ADDED TO CART</span>
                 </>
               ) : (
-                <>
-                  <ShoppingBag size={16} />
-                  <span>
-                    AÑADIR A LA BOLSA · {CurrencyService.formatUSD(product.price)}
-                  </span>
-                </>
+                <span>
+                  ADD TO CART — {CurrencyService.formatUSD(product.price)} +
+                </span>
               )}
             </button>
 
@@ -256,8 +253,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               className="pill-btn pill-btn--outline"
               style={{ width: '100%' }}
             >
-              <span>VER FICHA COMPLETA E INGREDIENTES / COMPOSICIÓN</span>
-              <ArrowUpRight size={15} />
+              <span>OPEN FULL TECHNICAL SPEC SHEET</span>
+              <ArrowUpRight size={14} />
             </button>
           </div>
         </div>
@@ -265,4 +262,3 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     </div>
   );
 };
-

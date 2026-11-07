@@ -12,7 +12,7 @@ interface ColorSwatchSelectorProps {
 
 /**
  * ColorSwatchSelector
- * Single Responsibility: Interactive selector for product colors or makeup shades.
+ * Single Responsibility: Sharp 0px architectural color/shade swatch selector per DESIGN2.md.
  */
 export const ColorSwatchSelector: React.FC<ColorSwatchSelectorProps> = ({
   colors,
@@ -22,7 +22,7 @@ export const ColorSwatchSelector: React.FC<ColorSwatchSelectorProps> = ({
   showLabel = true,
   labelPrefix = 'COLOR',
 }) => {
-  const swatchDimension = size === 'sm' ? 20 : 28;
+  const swatchDimension = size === 'sm' ? 18 : 26;
 
   return (
     <div>
@@ -32,28 +32,25 @@ export const ColorSwatchSelector: React.FC<ColorSwatchSelectorProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: 'var(--spacing-10)',
+            marginBottom: 'var(--spacing-8)',
             gap: 'var(--spacing-8)',
           }}
         >
           <span
             className="text-caption-editorial"
-            style={{ color: 'var(--color-lumera-statement)' }}
+            style={{ color: 'var(--color-soft-black)' }}
           >
-            {labelPrefix}:{' '}
-            <strong style={{ color: 'var(--color-carbon)' }}>
-              {selectedColor.name}
-            </strong>
+            {labelPrefix}: <strong>{selectedColor.name}</strong>
           </span>
           {selectedColor.finish && (
             <span
               className="text-caption-editorial"
               style={{
-                color: 'var(--color-lumera-statement)',
-                opacity: 0.85,
+                color: 'var(--color-soft-black)',
+                opacity: 0.65,
               }}
             >
-              {selectedColor.finish}
+              [{selectedColor.finish}]
             </span>
           )}
         </div>
@@ -64,7 +61,7 @@ export const ColorSwatchSelector: React.FC<ColorSwatchSelectorProps> = ({
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: size === 'sm' ? 'var(--spacing-8)' : 'var(--spacing-10)',
+          gap: size === 'sm' ? '6px' : '8px',
         }}
       >
         {colors.map((color) => {
@@ -80,32 +77,29 @@ export const ColorSwatchSelector: React.FC<ColorSwatchSelectorProps> = ({
                 onSelectColor(color);
               }}
               style={{
-                width: swatchDimension + 8,
-                height: swatchDimension + 8,
-                borderRadius: 'var(--radius-full)',
-                padding: '3px',
+                width: swatchDimension + 6,
+                height: swatchDimension + 6,
+                padding: '2px',
                 border: isSelected
-                  ? '2px solid var(--color-lumera-statement)'
-                  : '1px solid var(--color-lumera-mist)',
-                backgroundColor: 'var(--color-paper-white)',
+                  ? '1.5px solid var(--color-warm-charcoal)'
+                  : '1px solid var(--color-ash-gray)',
+                backgroundColor: 'var(--color-pure-white)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'border-color 0.15s ease',
               }}
             >
               <span
                 style={{
                   width: '100%',
                   height: '100%',
-                  borderRadius: 'var(--radius-full)',
                   backgroundColor: color.hex,
                   border:
                     color.hex.toLowerCase() === '#ffffff' ||
                     color.hex.toLowerCase() === '#f8f8f6' ||
                     color.hex.toLowerCase() === '#f5efe6'
-                      ? '1px solid var(--color-lumera-mist)'
+                      ? '1px solid var(--color-ash-gray)'
                       : 'none',
                 }}
               />
@@ -116,4 +110,3 @@ export const ColorSwatchSelector: React.FC<ColorSwatchSelectorProps> = ({
     </div>
   );
 };
-

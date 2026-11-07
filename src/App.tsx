@@ -150,7 +150,7 @@ export const App: React.FC = () => {
         }}
       />
 
-      {/* Floating Pill Notification on Add to Cart */}
+      {/* Floating Architectural Notification on Add to Cart */}
       {lastAddedNotification && (
         <div
           role="status"
@@ -159,29 +159,28 @@ export const App: React.FC = () => {
             bottom: 'var(--spacing-24)',
             right: 'var(--spacing-24)',
             zIndex: 95,
-            backgroundColor: 'var(--color-lumera-statement)',
-            color: 'var(--color-paper-white)',
-            borderRadius: 'var(--radius-buttons-lg)',
-            padding: 'var(--spacing-15) var(--spacing-24)',
+            backgroundColor: 'var(--color-warm-charcoal)',
+            color: 'var(--color-pure-white)',
+            padding: '14px 20px',
             display: 'flex',
             alignItems: 'center',
             gap: 'var(--spacing-16)',
-            border: '2px solid var(--color-paper-white)',
+            border: '1px solid var(--color-pure-white)',
           }}
         >
           <span className="text-caption-editorial">
-            AÑADIDO A LA BOLSA: {lastAddedNotification}
+            ADDED: {lastAddedNotification}
           </span>
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
             className="pill-btn pill-btn--white"
             style={{
-              padding: 'var(--spacing-5) var(--spacing-15)',
-              fontSize: '11px',
+              padding: '6px 12px',
+              fontSize: '10px',
             }}
           >
-            VER BOLSA →
+            VIEW CART
           </button>
         </div>
       )}

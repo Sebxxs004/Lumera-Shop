@@ -11,8 +11,8 @@ interface SizeSelectorProps {
 
 /**
  * SizeSelector
- * Single Responsibility: Pill-shaped selector for sizes or makeup presentations,
- * displaying exact measurements/details for the chosen option.
+ * Single Responsibility: Sharp 0px spec-sheet selector for sizes or makeup presentations
+ * per Skills/DESIGN2.md (GT America Mono 11-12px uppercase, #24170f selected fill).
  */
 export const SizeSelector: React.FC<SizeSelectorProps> = ({
   sizes,
@@ -28,17 +28,14 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: 'var(--spacing-10)',
+          marginBottom: 'var(--spacing-8)',
         }}
       >
         <span
           className="text-caption-editorial"
-          style={{ color: 'var(--color-lumera-statement)' }}
+          style={{ color: 'var(--color-soft-black)' }}
         >
-          {labelPrefix}:{' '}
-          <strong style={{ color: 'var(--color-carbon)' }}>
-            {selectedSize.label}
-          </strong>
+          {labelPrefix}: <strong>{selectedSize.label}</strong>
         </span>
 
         {onOpenSizeGuide && (
@@ -49,12 +46,12 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--color-lumera-statement)',
+              color: 'var(--color-soft-black)',
               textDecoration: 'underline',
               cursor: 'pointer',
             }}
           >
-            GUÍA DE MEDIDAS & TONOS
+            [GUÍA DE MEDIDAS &amp; TONOS]
           </button>
         )}
       </div>
@@ -75,25 +72,24 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
               disabled={!size.inStock}
               onClick={() => onSelectSize(size)}
               style={{
-                borderRadius: 'var(--radius-buttons)',
-                padding: 'var(--spacing-10) var(--spacing-20)',
-                fontFamily: 'var(--font-soehne)',
-                fontSize: 'var(--text-body-sm)',
-                fontWeight: 'var(--font-weight-bold)',
-                letterSpacing: 'var(--tracking-body-sm)',
+                padding: '10px 18px',
+                fontFamily: 'var(--font-gt-america-mono)',
+                fontSize: '11px',
+                fontWeight: 'var(--font-weight-medium)',
+                letterSpacing: '0.071em',
+                textTransform: 'uppercase',
                 border: isSelected
-                  ? '1px solid var(--color-lumera-statement)'
-                  : '1px solid var(--color-lumera-mist)',
+                  ? '1px solid var(--color-warm-charcoal)'
+                  : '1px solid var(--color-soft-black)',
                 backgroundColor: isSelected
-                  ? 'var(--color-lumera-statement)'
-                  : 'var(--color-paper-white)',
+                  ? 'var(--color-warm-charcoal)'
+                  : 'var(--color-pure-white)',
                 color: isSelected
-                  ? 'var(--color-paper-white)'
-                  : 'var(--color-lumera-statement)',
+                  ? 'var(--color-pure-white)'
+                  : 'var(--color-soft-black)',
                 cursor: size.inStock ? 'pointer' : 'not-allowed',
-                opacity: size.inStock ? 1 : 0.38,
+                opacity: size.inStock ? 1 : 0.3,
                 textDecoration: size.inStock ? 'none' : 'line-through',
-                transition: 'all 0.15s ease',
               }}
             >
               {size.label}
@@ -106,18 +102,14 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
         <p
           className="text-caption-editorial"
           style={{
-            marginTop: 'var(--spacing-10)',
-            color: 'var(--color-carbon)',
-            fontWeight: 'var(--font-weight-regular)',
-            textTransform: 'none',
-            letterSpacing: 'var(--tracking-body-sm)',
-            fontSize: '12px',
+            marginTop: 'var(--spacing-8)',
+            color: 'var(--color-soft-black)',
+            opacity: 0.75,
           }}
         >
-          Detalle de selección: {selectedSize.measurementsOrDetail}
+          SPEC: {selectedSize.measurementsOrDetail}
         </p>
       )}
     </div>
   );
 };
-

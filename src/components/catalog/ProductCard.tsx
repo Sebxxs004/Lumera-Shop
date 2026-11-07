@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Heart, ShoppingBag } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { CurrencyService } from '../../services/currency.service';
 import {
   Product,
@@ -31,9 +31,12 @@ interface ProductCardProps {
 
 /**
  * ProductCard
- * Single Responsibility: Editorial product card allowing the user to preview images,
- * switch color/shade swatches live, choose a size/format, and either inspect full details
- * or add directly to the bag.
+ * Single Responsibility: Architectural product card per Skills/DESIGN2.md
+ * - Full-bleed editorial photograph (0px radius, no card border chrome — bleeds into white canvas)
+ * - Small '+' glyph in bottom-right corner of image for quick-add (#151515)
+ * - Below image: Product name in GT America Mono 12px weight 500 (#151515) with inline
+ *   Signal Blue (#0073ff) 'NEW IN' badge + Price in GT America Mono 12px weight 400 (#151515)
+ * - Interactive color swatches & size selector below for effortless shopping.
  */
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
@@ -59,20 +62,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: 'var(--surface-paper-white-canvas)',
-        border: '1px solid var(--color-lumera-mist)',
-        borderRadius: 'var(--radius-cards)',
+        backgroundColor: 'var(--color-pure-white)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        transition: 'border-color 0.2s ease',
-        borderColor: isHovered
-          ? 'var(--color-lumera-statement)'
-          : 'var(--color-lumera-mist)',
       }}
     >
-      {/* Top: Image Frame */}
       <div>
+        {/* 1. Full-bleed 0px Editorial Photograph */}
         <div
           onClick={() => onSelectProduct(product, selectedColor, selectedSize)}
           style={{
@@ -80,7 +77,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             aspectRatio: '3 / 4',
             overflow: 'hidden',
             cursor: 'pointer',
-            backgroundColor: 'var(--surface-fog-footer)',
+            backgroundColor: 'var(--color-ash-gray)',
+            marginBottom: 'var(--spacing-12)',
           }}
         >
           <img
@@ -92,24 +90,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               height: '100%',
               objectFit: 'cover',
               transition: 'transform 0.45s ease',
-              transform: isHovered ? 'scale(1.03)' : 'scale(1)',
+              transform: isHovered ? 'scale(1.02)' : 'scale(1)',
             }}
           />
 
-          {/* Top Left Badge */}
-          {product.badge && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'var(--spacing-12)',
-                left: 'var(--spacing-12)',
-              }}
-            >
-              <span className="pill-tag">{product.badge}</span>
-            </div>
-          )}
-
-          {/* Top Right Wishlist Button */}
+          {/* Top-Right Minimal Wishlist Toggle */}
           <button
             type="button"
             onClick={(e) => {
@@ -121,14 +106,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             }
             style={{
               position: 'absolute',
-              top: 'var(--spacing-12)',
-              right: 'var(--spacing-12)',
-              width: 38,
-              height: 38,
-              borderRadius: 'var(--radius-full)',
-              backgroundColor: 'var(--color-paper-white)',
-              border: '1px solid var(--color-lumera-statement)',
-              color: 'var(--color-lumera-statement)',
+              top: '12px',
+              right: '12px',
+              width: 30,
+              height: 30,
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              border: 'none',
+              color: 'var(--color-soft-black)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -136,115 +120,156 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             }}
           >
             <Heart
-              size={17}
-              fill={isWishlisted ? 'var(--color-lumera-statement)' : 'none'}
+              size={14}
+              strokeWidth={1.8}
+              fill={isWishlisted ? 'var(--color-soft-black)' : 'none'}
             />
           </button>
 
-          {/* Bottom Quick Inspect Pill on Hover */}
-          <div
+          {/* Bottom-Left Quick View Trigger on Hover */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickViewProduct(product, selectedColor, selectedSize);
+            }}
+            className="text-caption-editorial"
             style={{
               position: 'absolute',
-              bottom: 'var(--spacing-12)',
-              right: 'var(--spacing-12)',
-              left: 'var(--spacing-12)',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              opacity: isHovered ? 1 : 0,
-              transition: 'opacity 0.2s ease',
-              pointerEvents: isHovered ? 'auto' : 'none',
+              bottom: '12px',
+              left: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.92)',
+              color: 'var(--color-soft-black)',
+              border: '1px solid var(--color-warm-charcoal)',
+              padding: '5px 10px',
+              cursor: 'pointer',
+              opacity: isHovered ? 1 : 0.85,
             }}
           >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onQuickViewProduct(product, selectedColor, selectedSize);
-              }}
-              className="pill-btn pill-btn--white"
-              style={{
-                padding: 'var(--spacing-8) var(--spacing-16)',
-                fontSize: 'var(--text-caption)',
-              }}
-            >
-              <Eye size={14} />
-              <span>VISTA RÁPIDA</span>
-            </button>
-          </div>
+            QUICK SPEC
+          </button>
+
+          {/* Bottom-Right Quick-Add '+' Glyph per DESIGN2.md */}
+          <button
+            type="button"
+            title="Añadir rápidamente a la bolsa"
+            aria-label={`Añadir ${product.name} a la bolsa`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickAddToCart(product, selectedColor, selectedSize);
+            }}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '12px',
+              width: 28,
+              height: 28,
+              backgroundColor: 'rgba(255, 255, 255, 0.92)',
+              border: 'none',
+              color: 'var(--color-soft-black)',
+              fontFamily: 'var(--font-gt-america-mono)',
+              fontSize: '18px',
+              fontWeight: 'var(--font-weight-regular)',
+              lineHeight: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            +
+          </button>
         </div>
 
-        {/* Product Info Block */}
-        <div style={{ padding: 'var(--spacing-20)' }}>
+        {/* 2. Bare-White Spec Block Below Image */}
+        <div>
+          {/* Product Name + Inline Signal Blue 'NEW IN' Badge per DESIGN2.md */}
           <div
             style={{
               display: 'flex',
+              alignItems: 'flex-start',
               justifyContent: 'space-between',
-              alignItems: 'baseline',
               gap: 'var(--spacing-8)',
-              marginBottom: 'var(--spacing-6)',
+              marginBottom: '6px',
             }}
           >
-            <span
-              className="text-caption-editorial"
-              style={{ color: 'var(--color-lumera-statement)' }}
+            <h3
+              onClick={() =>
+                onSelectProduct(product, selectedColor, selectedSize)
+              }
+              style={{
+                fontFamily: 'var(--font-gt-america-mono)',
+                fontSize: '12px',
+                fontWeight: 'var(--font-weight-medium)',
+                letterSpacing: '0.067em',
+                lineHeight: 1.4,
+                color: 'var(--color-soft-black)',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
             >
-              {product.categoryLabel}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {product.name}
+            </h3>
+
+            {product.badge && (
+              <span className="badge-new-in" style={{ flexShrink: 0 }}>
+                {product.badge}
+              </span>
+            )}
+          </div>
+
+          {/* Price Row in GT America Mono 12px weight 400 (#151515) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 'var(--spacing-12)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '12px',
+                  fontWeight: 'var(--font-weight-regular)',
+                  letterSpacing: '0.067em',
+                  color: 'var(--color-soft-black)',
+                }}
+              >
+                {CurrencyService.formatUSD(product.price)}
+              </span>
               {product.compareAtPrice && (
                 <span
-                  className="text-body-sm-editorial"
                   style={{
-                    color: 'var(--color-lumera-mist)',
+                    fontFamily: 'var(--font-gt-america-mono)',
+                    fontSize: '11px',
+                    color: 'var(--color-soft-black)',
+                    opacity: 0.45,
                     textDecoration: 'line-through',
                   }}
                 >
                   {CurrencyService.formatUSD(product.compareAtPrice)}
                 </span>
               )}
-              <span
-                className="text-body-sm-editorial"
-                style={{
-                  fontWeight: 'var(--font-weight-bold)',
-                  color: 'var(--color-lumera-statement)',
-                }}
-              >
-                {CurrencyService.formatUSD(product.price)}
-              </span>
             </div>
+
+            <span
+              className="text-caption-editorial"
+              style={{ color: 'var(--color-soft-black)', opacity: 0.55 }}
+            >
+              {product.sku}
+            </span>
           </div>
 
-          <h3
-            onClick={() =>
-              onSelectProduct(product, selectedColor, selectedSize)
-            }
-            style={{
-              fontFamily: 'var(--font-integral)',
-              fontSize: '22px',
-              lineHeight: 1.05,
-              letterSpacing: '0.03em',
-              color: 'var(--color-lumera-statement)',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              marginBottom: 'var(--spacing-6)',
-            }}
-          >
-            {product.name}
-          </h3>
-
-          <p
-            className="text-body-sm-editorial"
-            style={{
-              color: 'var(--color-carbon)',
-              marginBottom: 'var(--spacing-16)',
-              fontSize: '13px',
-            }}
-          >
-            {product.subtitle}
-          </p>
-
           {/* Interactive Color / Shade Swatches */}
-          <div style={{ marginBottom: 'var(--spacing-15)' }}>
+          <div
+            style={{
+              paddingTop: 'var(--spacing-10)',
+              borderTop: '1px solid var(--color-ash-gray)',
+              marginBottom: 'var(--spacing-10)',
+            }}
+          >
             <ColorSwatchSelector
               colors={product.colors}
               selectedColor={selectedColor}
@@ -255,25 +280,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           {/* Interactive Size / Format Quick Selector */}
-          <div>
-            <span
-              className="text-caption-editorial"
-              style={{
-                display: 'block',
-                color: 'var(--color-lumera-statement)',
-                marginBottom: 'var(--spacing-6)',
-              }}
-            >
-              {product.sizeTypeLabel}:{' '}
-              <strong style={{ color: 'var(--color-carbon)' }}>
-                {selectedSize.label}
-              </strong>
-            </span>
+          <div style={{ marginBottom: 'var(--spacing-12)' }}>
             <div
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: 'var(--spacing-6)',
+                gap: '4px',
               }}
             >
               {product.sizes.map((sizeOpt) => {
@@ -288,8 +300,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                       isSelected ? 'is-selected' : ''
                     }`}
                     style={{
-                      padding: '4px 11px',
-                      fontSize: '11px',
+                      padding: '4px 8px',
+                      fontSize: '10px',
                       textDecoration: sizeOpt.inStock ? 'none' : 'line-through',
                     }}
                   >
@@ -302,10 +314,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
 
-      {/* Bottom Action Bar */}
+      {/* Bottom Architectural Action Row */}
       <div
         style={{
-          padding: '0 var(--spacing-20) var(--spacing-20)',
           display: 'grid',
           gridTemplateColumns: '1fr auto',
           gap: 'var(--spacing-8)',
@@ -319,12 +330,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="pill-btn pill-btn--brand"
           style={{
             width: '100%',
-            padding: 'var(--spacing-12) var(--spacing-16)',
-            fontSize: 'var(--text-caption)',
+            padding: '12px 16px',
+            fontSize: '11px',
           }}
         >
-          <ShoppingBag size={15} />
-          <span>AÑADIR A LA BOLSA</span>
+          ADD TO CART +
         </button>
 
         <button
@@ -332,15 +342,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           onClick={() => onSelectProduct(product, selectedColor, selectedSize)}
           className="pill-btn pill-btn--outline"
           style={{
-            padding: 'var(--spacing-12) var(--spacing-16)',
-            fontSize: 'var(--text-caption)',
+            padding: '12px 14px',
+            fontSize: '11px',
           }}
-          title="Ver ficha completa del producto"
         >
-          FICHA →
+          SPEC
         </button>
       </div>
     </article>
   );
 };
-

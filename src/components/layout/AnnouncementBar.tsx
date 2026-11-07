@@ -6,8 +6,8 @@ interface AnnouncementBarProps {
 
 /**
  * AnnouncementBar
- * Single Responsibility: Top-of-page utility strip in soft Pastel Pink (--color-lumera-pastel)
- * with responsive typography for mobile and desktop.
+ * Single Responsibility: Top architectural spec strip on Warm Charcoal (#24170f)
+ * with GT America Mono 10px uppercase text (#ffffff) per Skills/DESIGN2.md.
  */
 export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
   onExploreClick,
@@ -15,13 +15,12 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
   return (
     <div
       style={{
-        backgroundColor: 'var(--color-lumera-pastel)',
-        borderBottom: '1px solid var(--color-lumera-mist)',
-        minHeight: '38px',
+        backgroundColor: 'var(--color-warm-charcoal)',
+        minHeight: '34px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '6px var(--spacing-15)',
+        padding: '6px var(--spacing-16)',
       }}
     >
       <button
@@ -31,20 +30,19 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
         style={{
           background: 'none',
           border: 'none',
-          color: 'var(--color-lumera-statement)',
+          color: 'var(--color-pure-white)',
           cursor: 'pointer',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: 'var(--spacing-8)',
           textAlign: 'center',
-          fontSize: 'clamp(10px, 2.5vw, 11px)',
         }}
       >
         <span>
-          MODA BOUTIQUE &amp; LUMÉRA BEAUTY · ENVÍO DE CORTESÍA DESDE $180
+          SPEC 2026 // MODA BOUTIQUE &amp; LUMÉRA BEAUTY — ENVÍO DE CORTESÍA
+          DESDE $180 USD [EXPLORAR]
         </span>
-        <span aria-hidden="true">→</span>
       </button>
     </div>
   );

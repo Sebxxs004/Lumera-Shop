@@ -15,9 +15,8 @@ interface PillDropdownProps<T extends string> {
 
 /**
  * PillDropdown
- * Single Responsibility: Custom accessible dropdown menu that replaces the native OS <select>
- * to strictly preserve the DESIGN.md aesthetic (pill trigger, flat elevation, zero system blue,
- * single chromatic brand color #c21863 on #ffffff paper-white canvas).
+ * Single Responsibility: Sharp 0px architectural dropdown menu per Skills/DESIGN2.md
+ * (GT America Mono 11px uppercase, #24170f active fill, #ececec hover band, 0px radius).
  */
 export function PillDropdown<T extends string>({
   options,
@@ -64,7 +63,7 @@ export function PillDropdown<T extends string>({
         display: 'inline-block',
       }}
     >
-      {/* Pill Trigger Button */}
+      {/* Sharp 0px Trigger Button */}
       <button
         type="button"
         aria-haspopup="listbox"
@@ -73,42 +72,40 @@ export function PillDropdown<T extends string>({
         onClick={() => setIsOpen((prev) => !prev)}
         className={`pill-btn ${isOpen ? 'pill-btn--brand' : 'pill-btn--outline'}`}
         style={{
-          padding: 'var(--spacing-10) var(--spacing-20)',
-          fontSize: 'var(--text-caption)',
-          minWidth: '235px',
+          padding: '10px 18px',
+          fontSize: '10px',
+          letterSpacing: '0.093em',
+          minWidth: '220px',
           justifyContent: 'space-between',
         }}
       >
         <span>{selectedOption.label}</span>
         <ChevronDown
-          size={14}
+          size={13}
           style={{
-            transition: 'transform 0.2s ease',
+            transition: 'transform 0.18s ease',
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           }}
         />
       </button>
 
-      {/* Custom Editorial Dropdown List */}
+      {/* Architectural 0px Dropdown Menu */}
       {isOpen && (
         <ul
           role="listbox"
           aria-label={ariaLabel}
           style={{
             position: 'absolute',
-            top: 'calc(100% + 8px)',
+            top: 'calc(100% + 4px)',
             right: 0,
             minWidth: '100%',
             width: 'max-content',
             zIndex: 60,
             listStyle: 'none',
-            backgroundColor: 'var(--surface-paper-white-canvas)',
-            border: '1px solid var(--color-lumera-statement)',
-            borderRadius: '22px',
-            padding: 'var(--spacing-8)',
+            backgroundColor: 'var(--color-pure-white)',
+            border: '1px solid var(--color-warm-charcoal)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px',
           }}
         >
           {options.map((opt) => {
@@ -131,34 +128,30 @@ export function PillDropdown<T extends string>({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: 'var(--spacing-12)',
-                    padding: 'var(--spacing-10) var(--spacing-16)',
-                    borderRadius: 'var(--radius-buttons)',
-                    border:
-                      isHovered && !isSelected
-                        ? '1px solid var(--color-lumera-mist)'
-                        : '1px solid transparent',
+                    padding: '11px 16px',
+                    border: 'none',
+                    borderBottom: '1px solid var(--color-ash-gray)',
                     backgroundColor: isSelected
-                      ? 'var(--color-lumera-statement)'
+                      ? 'var(--color-warm-charcoal)'
                       : isHovered
-                      ? 'var(--surface-fog-footer)'
-                      : 'var(--color-paper-white)',
+                      ? 'var(--color-ash-gray)'
+                      : 'var(--color-pure-white)',
                     color: isSelected
-                      ? 'var(--color-paper-white)'
-                      : 'var(--color-lumera-statement)',
-                    fontFamily: 'var(--font-soehne)',
-                    fontSize: 'var(--text-caption)',
+                      ? 'var(--color-pure-white)'
+                      : 'var(--color-soft-black)',
+                    fontFamily: 'var(--font-gt-america-mono)',
+                    fontSize: '10px',
                     fontWeight: isSelected
-                      ? 'var(--font-weight-bold)'
+                      ? 'var(--font-weight-medium)'
                       : 'var(--font-weight-regular)',
-                    letterSpacing: 'var(--tracking-caption)',
+                    letterSpacing: '0.093em',
                     textTransform: 'uppercase',
                     textAlign: 'left',
                     cursor: 'pointer',
-                    transition: 'background-color 0.15s ease, color 0.15s ease',
                   }}
                 >
                   <span>{opt.label}</span>
-                  {isSelected && <Check size={13} strokeWidth={2.5} />}
+                  {isSelected && <Check size={12} strokeWidth={2} />}
                 </button>
               </li>
             );

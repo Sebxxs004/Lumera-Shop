@@ -8,8 +8,8 @@ interface SizeAndShadeGuideModalProps {
 
 /**
  * SizeAndShadeGuideModal
- * Single Responsibility: Displays the boutique garment measurement table (XS-XL)
- * and the Luméra Beauty makeup finish & shade guide.
+ * Single Responsibility: Architectural spec-sheet modal for garment measurements
+ * and makeup finishes per Skills/DESIGN2.md.
  */
 export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
   isOpen,
@@ -18,11 +18,11 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
   if (!isOpen) return null;
 
   const sizeRows = [
-    { size: 'XS (34)', bust: '80 - 84 cm', waist: '60 - 64 cm', hip: '88 - 92 cm' },
-    { size: 'S (36)', bust: '84 - 88 cm', waist: '64 - 68 cm', hip: '92 - 96 cm' },
-    { size: 'M (38)', bust: '88 - 93 cm', waist: '68 - 73 cm', hip: '96 - 101 cm' },
-    { size: 'L (40)', bust: '93 - 99 cm', waist: '73 - 79 cm', hip: '101 - 107 cm' },
-    { size: 'XL (42)', bust: '99 - 105 cm', waist: '79 - 85 cm', hip: '107 - 113 cm' },
+    { size: 'XS (34)', bust: '80 - 84 CM', waist: '60 - 64 CM', hip: '88 - 92 CM' },
+    { size: 'S (36)', bust: '84 - 88 CM', waist: '64 - 68 CM', hip: '92 - 96 CM' },
+    { size: 'M (38)', bust: '88 - 93 CM', waist: '68 - 73 CM', hip: '96 - 101 CM' },
+    { size: 'L (40)', bust: '93 - 99 CM', waist: '73 - 79 CM', hip: '101 - 107 CM' },
+    { size: 'XL (42)', bust: '99 - 105 CM', waist: '79 - 85 CM', hip: '107 - 113 CM' },
   ];
 
   return (
@@ -35,24 +35,23 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 100,
-        backgroundColor: 'rgba(27, 27, 27, 0.65)',
+        backgroundColor: 'rgba(21, 21, 21, 0.72)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 'var(--spacing-20)',
+        padding: 'var(--spacing-16)',
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'var(--surface-paper-white-canvas)',
-          border: '2px solid var(--color-lumera-statement)',
-          borderRadius: 'var(--radius-cards)',
+          backgroundColor: 'var(--color-pure-white)',
+          border: '1px solid var(--color-warm-charcoal)',
           maxWidth: '720px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          padding: 'var(--card-padding)',
+          padding: 'var(--spacing-24)',
         }}
       >
         <div
@@ -62,13 +61,13 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
             alignItems: 'center',
             marginBottom: 'var(--spacing-24)',
             paddingBottom: 'var(--spacing-16)',
-            borderBottom: '1px solid var(--color-lumera-mist)',
+            borderBottom: '1px solid var(--color-warm-charcoal)',
           }}
         >
           <div>
-            <p className="text-caption-editorial">ATELIER &amp; BEAUTY</p>
+            <p className="text-caption-editorial">SPECIFICATION SHEET // 01</p>
             <h2 className="display-heading-sm">
-              GUÍA DE TALLAS, MEDIDAS &amp; TONOS
+              SIZE MEASUREMENTS &amp; SHADE GUIDE
             </h2>
           </div>
 
@@ -77,43 +76,43 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
             onClick={onClose}
             aria-label="Cerrar guía"
             className="pill-btn pill-btn--outline"
-            style={{ padding: 'var(--spacing-8) var(--spacing-16)' }}
+            style={{ padding: '8px 14px' }}
           >
-            <X size={18} />
+            <X size={15} />
           </button>
         </div>
 
         {/* Section 1: Boutique Apparel Sizes */}
-        <div style={{ marginBottom: 'var(--spacing-30)' }}>
+        <div style={{ marginBottom: 'var(--spacing-32)' }}>
           <h3
             className="text-caption-editorial"
             style={{
-              color: 'var(--color-lumera-statement)',
+              color: 'var(--color-soft-black)',
               marginBottom: 'var(--spacing-12)',
             }}
           >
-            1. MEDIDAS CORPORALES — ROPA FEMENINA BOUTIQUE
+            01 // BOUTIQUE APPAREL BODY MEASUREMENTS (CM)
           </h3>
           <div style={{ overflowX: 'auto' }}>
             <table
               style={{
                 width: '100%',
                 borderCollapse: 'collapse',
-                fontSize: 'var(--text-body-sm)',
+                fontSize: '12px',
               }}
             >
               <thead>
                 <tr
                   style={{
-                    borderBottom: '2px solid var(--color-lumera-statement)',
+                    borderBottom: '1px solid var(--color-warm-charcoal)',
                     textAlign: 'left',
-                    color: 'var(--color-lumera-statement)',
+                    color: 'var(--color-soft-black)',
                   }}
                 >
-                  <th style={{ padding: 'var(--spacing-10)' }}>TALLA</th>
-                  <th style={{ padding: 'var(--spacing-10)' }}>BUSTO</th>
-                  <th style={{ padding: 'var(--spacing-10)' }}>CINTURA</th>
-                  <th style={{ padding: 'var(--spacing-10)' }}>CADERA</th>
+                  <th style={{ padding: '10px' }}>SIZE</th>
+                  <th style={{ padding: '10px' }}>BUST</th>
+                  <th style={{ padding: '10px' }}>WAIST</th>
+                  <th style={{ padding: '10px' }}>HIP</th>
                 </tr>
               </thead>
               <tbody>
@@ -121,21 +120,21 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
                   <tr
                     key={row.size}
                     style={{
-                      borderBottom: '1px solid var(--color-lumera-mist)',
+                      borderBottom: '1px solid var(--color-ash-gray)',
                     }}
                   >
                     <td
                       style={{
-                        padding: 'var(--spacing-10)',
-                        fontWeight: 'var(--font-weight-bold)',
-                        color: 'var(--color-lumera-statement)',
+                        padding: '10px',
+                        fontWeight: 'var(--font-weight-medium)',
+                        color: 'var(--color-soft-black)',
                       }}
                     >
                       {row.size}
                     </td>
-                    <td style={{ padding: 'var(--spacing-10)' }}>{row.bust}</td>
-                    <td style={{ padding: 'var(--spacing-10)' }}>{row.waist}</td>
-                    <td style={{ padding: 'var(--spacing-10)' }}>{row.hip}</td>
+                    <td style={{ padding: '10px' }}>{row.bust}</td>
+                    <td style={{ padding: '10px' }}>{row.waist}</td>
+                    <td style={{ padding: '10px' }}>{row.hip}</td>
                   </tr>
                 ))}
               </tbody>
@@ -148,11 +147,11 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
           <h3
             className="text-caption-editorial"
             style={{
-              color: 'var(--color-lumera-statement)',
+              color: 'var(--color-soft-black)',
               marginBottom: 'var(--spacing-12)',
             }}
           >
-            2. GUÍA DE ACABADOS — MAQUILLAJE LUMÉRA BEAUTY
+            02 // LUMÉRA BEAUTY FINISHES &amp; TEXTURES
           </h3>
           <div
             style={{
@@ -163,20 +162,19 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
           >
             <div
               style={{
-                border: '1px solid var(--color-lumera-mist)',
-                borderRadius: 'var(--radius-cards)',
-                padding: 'var(--spacing-15)',
+                border: '1px solid var(--color-warm-charcoal)',
+                padding: 'var(--spacing-16)',
               }}
             >
               <strong
                 className="text-caption-editorial"
-                style={{ color: 'var(--color-lumera-statement)' }}
+                style={{ color: 'var(--color-soft-black)' }}
               >
-                BRILLO ESPEJO 3D (GLAZE)
+                3D MIRROR GLAZE
               </strong>
               <p
                 className="text-body-sm-editorial"
-                style={{ marginTop: 'var(--spacing-6)' }}
+                style={{ marginTop: 'var(--spacing-8)' }}
               >
                 Cobertura translúcida modulable con péptidos voluminizadores y
                 reflejo cristal sin sensación pegajosa.
@@ -184,20 +182,19 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
             </div>
             <div
               style={{
-                border: '1px solid var(--color-lumera-mist)',
-                borderRadius: 'var(--radius-cards)',
-                padding: 'var(--spacing-15)',
+                border: '1px solid var(--color-warm-charcoal)',
+                padding: 'var(--spacing-16)',
               }}
             >
               <strong
                 className="text-caption-editorial"
-                style={{ color: 'var(--color-lumera-statement)' }}
+                style={{ color: 'var(--color-soft-black)' }}
               >
-                MATE TERCIOPELO (VELVET)
+                VELVET MATTE
               </strong>
               <p
                 className="text-body-sm-editorial"
-                style={{ marginTop: 'var(--spacing-6)' }}
+                style={{ marginTop: 'var(--spacing-8)' }}
               >
                 Pigmento puro en una pasada con micro-esferas hidratantes que
                 suavizan la textura del labio.
@@ -205,23 +202,22 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
             </div>
             <div
               style={{
-                border: '1px solid var(--color-lumera-mist)',
-                borderRadius: 'var(--radius-cards)',
-                padding: 'var(--spacing-15)',
+                border: '1px solid var(--color-warm-charcoal)',
+                padding: 'var(--spacing-16)',
               }}
             >
               <strong
                 className="text-caption-editorial"
-                style={{ color: 'var(--color-lumera-statement)' }}
+                style={{ color: 'var(--color-soft-black)' }}
               >
-                SEGUNDA PIEL (SILK DEW)
+                SILK DEW SERUM
               </strong>
               <p
                 className="text-body-sm-editorial"
-                style={{ marginTop: 'var(--spacing-6)' }}
+                style={{ marginTop: 'var(--spacing-8)' }}
               >
                 Fórmulas líquidas en sérum que se funden con la piel para un
-                rubor natural de larga duración.
+                acabado natural de larga duración.
               </p>
             </div>
           </div>
@@ -233,11 +229,10 @@ export const SizeAndShadeGuideModal: React.FC<SizeAndShadeGuideModalProps> = ({
             onClick={onClose}
             className="pill-btn pill-btn--brand"
           >
-            ENTENDIDO →
+            CLOSE SPEC SHEET
           </button>
         </div>
       </div>
     </div>
   );
 };
-

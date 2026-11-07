@@ -5,10 +5,6 @@ import {
   Heart,
   Minus,
   Plus,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  Truck,
 } from 'lucide-react';
 import { CurrencyService } from '../../services/currency.service';
 import { ProductService } from '../../services/product.service';
@@ -39,9 +35,9 @@ interface ProductDetailViewProps {
 
 /**
  * ProductDetailView
- * Single Responsibility: Full editorial product page showing photography angles,
- * color/shade variants, size/format measurements, composition/ingredients,
- * and cross-sell recommendations.
+ * Single Responsibility: Full architectural spec-sheet product page per Skills/DESIGN2.md
+ * (0px sharp photography, GT America Mono specifications, Nimbus Sans Extended titles,
+ *  #24170f Warm Charcoal primary actions, #0073ff Signal Blue novelty badge).
  */
 export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   product,
@@ -93,7 +89,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
   return (
     <section className="lumera-container lumera-section">
-      {/* Top Breadcrumb & Back Navigation */}
+      {/* Top Spec Breadcrumb & Back Navigation */}
       <div
         style={{
           display: 'flex',
@@ -101,9 +97,9 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 'var(--spacing-16)',
-          marginBottom: 'var(--spacing-30)',
+          marginBottom: 'var(--spacing-32)',
           paddingBottom: 'var(--spacing-16)',
-          borderBottom: '1px solid var(--color-lumera-mist)',
+          borderBottom: '1px solid var(--color-warm-charcoal)',
         }}
       >
         <button
@@ -111,36 +107,34 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           onClick={onBackToCatalog}
           className="pill-btn pill-btn--outline"
           style={{
-            padding: 'var(--spacing-8) var(--spacing-20)',
-            fontSize: 'var(--text-caption)',
+            padding: '10px 20px',
+            fontSize: '10px',
           }}
         >
-          <ArrowLeft size={15} />
-          <span>VOLVER AL CATÁLOGO</span>
+          <ArrowLeft size={13} />
+          <span>BACK TO INDEX</span>
         </button>
 
         <div
           className="text-caption-editorial"
-          style={{ color: 'var(--color-lumera-statement)' }}
+          style={{ color: 'var(--color-soft-black)' }}
         >
-          LUMÉRA / {product.categoryLabel.toUpperCase()} /{' '}
-          <span style={{ color: 'var(--color-carbon)' }}>{product.sku}</span>
+          SPEC SHEET // {product.categoryLabel.toUpperCase()} //{' '}
+          <strong>{product.sku}</strong>
         </div>
       </div>
 
-      {/* Main 2-Column Editorial Spread (Stacks into 1 column on mobile) */}
+      {/* Main 2-Column Architectural Spread */}
       <div className="product-detail-grid">
-        {/* Left Column: Product Photography Gallery */}
+        {/* Left Column: Full-Bleed 0px Photography Gallery */}
         <div>
           <div
             style={{
               position: 'relative',
               aspectRatio: '3 / 4',
-              borderRadius: 'var(--radius-cards)',
               overflow: 'hidden',
-              border: '1px solid var(--color-lumera-mist)',
-              backgroundColor: 'var(--surface-fog-footer)',
-              marginBottom: 'var(--spacing-16)',
+              backgroundColor: 'var(--color-ash-gray)',
+              marginBottom: 'var(--spacing-12)',
             }}
           >
             <img
@@ -153,28 +147,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               }}
             />
 
-            {product.badge && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 'var(--spacing-16)',
-                  left: 'var(--spacing-16)',
-                }}
-              >
-                <span className="pill-tag">{product.badge}</span>
-              </div>
-            )}
-
-            {/* Color Swatch Badge Overlay */}
+            {/* Bottom-Left Active Swatch Indicator */}
             <div
               style={{
                 position: 'absolute',
-                bottom: 'var(--spacing-16)',
-                left: 'var(--spacing-16)',
-                backgroundColor: 'var(--color-paper-white)',
-                border: '1px solid var(--color-lumera-statement)',
-                borderRadius: 'var(--radius-tags)',
-                padding: '6px 14px',
+                bottom: '12px',
+                left: '12px',
+                backgroundColor: 'var(--color-pure-white)',
+                border: '1px solid var(--color-warm-charcoal)',
+                padding: '6px 12px',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -182,23 +163,22 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             >
               <span
                 style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 'var(--radius-full)',
+                  width: 10,
+                  height: 10,
                   backgroundColor: selectedColor.hex,
-                  border: '1px solid var(--color-lumera-mist)',
+                  border: '1px solid var(--color-soft-black)',
                 }}
               />
               <span
                 className="text-caption-editorial"
-                style={{ color: 'var(--color-lumera-statement)' }}
+                style={{ color: 'var(--color-soft-black)' }}
               >
                 {selectedColor.name}
               </span>
             </div>
           </div>
 
-          {/* Thumbnail Strip */}
+          {/* 0px Thumbnail Strip */}
           {currentImages.length > 1 && (
             <div
               style={{
@@ -214,13 +194,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   onClick={() => setActiveImageIndex(index)}
                   style={{
                     width: 84,
-                    height: 108,
-                    borderRadius: 'var(--radius-cards)',
+                    height: 110,
                     overflow: 'hidden',
                     border:
                       activeImageIndex === index
-                        ? '2px solid var(--color-lumera-statement)'
-                        : '1px solid var(--color-lumera-mist)',
+                        ? '2px solid var(--color-warm-charcoal)'
+                        : '1px solid var(--color-ash-gray)',
                     padding: 0,
                     cursor: 'pointer',
                     background: 'none',
@@ -242,57 +221,75 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           )}
         </div>
 
-        {/* Right Column: Product Configuration & Editorial Details */}
+        {/* Right Column: Architectural Spec Sheet & Configuration */}
         <div>
-          <p
-            className="text-caption-editorial"
+          <div
             style={{
-              color: 'var(--color-lumera-statement)',
-              marginBottom: 'var(--spacing-8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 'var(--spacing-12)',
+              marginBottom: 'var(--spacing-12)',
             }}
           >
-            {product.categoryLabel} · SKU {product.sku}
-          </p>
+            <span
+              className="text-caption-editorial"
+              style={{ color: 'var(--color-soft-black)' }}
+            >
+              {product.categoryLabel} // REF: {product.sku}
+            </span>
+
+            {product.badge && (
+              <span className="badge-new-in">{product.badge}</span>
+            )}
+          </div>
 
           <h1
             className="display-heading"
-            style={{ marginBottom: 'var(--spacing-10)' }}
+            style={{ marginBottom: 'var(--spacing-8)' }}
           >
             {product.name}
           </h1>
 
           <p
+            className="text-body-sm-editorial"
             style={{
-              fontSize: 'var(--text-subheading)',
-              color: 'var(--color-carbon)',
+              color: 'var(--color-soft-black)',
               marginBottom: 'var(--spacing-20)',
+              textTransform: 'uppercase',
             }}
           >
             {product.subtitle}
           </p>
 
-          {/* Price Block */}
+          {/* Price Spec Row */}
           <div
             style={{
               display: 'flex',
               alignItems: 'baseline',
               gap: 'var(--spacing-12)',
-              paddingBottom: 'var(--spacing-24)',
+              paddingBottom: 'var(--spacing-20)',
               marginBottom: 'var(--spacing-24)',
-              borderBottom: '1px solid var(--color-lumera-mist)',
+              borderBottom: '1px solid var(--color-warm-charcoal)',
             }}
           >
             <span
-              className="display-heading-sm"
-              style={{ color: 'var(--color-lumera-statement)' }}
+              style={{
+                fontFamily: 'var(--font-gt-america-mono)',
+                fontSize: '20px',
+                fontWeight: 'var(--font-weight-medium)',
+                color: 'var(--color-soft-black)',
+              }}
             >
               {CurrencyService.formatUSD(product.price)}
             </span>
             {product.compareAtPrice && (
               <span
                 style={{
-                  fontSize: 'var(--text-subheading)',
-                  color: 'var(--color-lumera-mist)',
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '14px',
+                  color: 'var(--color-soft-black)',
+                  opacity: 0.45,
                   textDecoration: 'line-through',
                 }}
               >
@@ -300,10 +297,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </span>
             )}
             <span
-              className="pill-tag pill-tag--outline"
-              style={{ marginLeft: 'auto' }}
+              className="text-caption-editorial"
+              style={{ marginLeft: 'auto', color: 'var(--color-soft-black)' }}
             >
-              DISPONIBLE EN STOCK
+              STATUS: IN STOCK
             </span>
           </div>
 
@@ -319,7 +316,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </div>
 
           {/* 2. Selector de Talla / Formato */}
-          <div style={{ marginBottom: 'var(--spacing-30)' }}>
+          <div style={{ marginBottom: 'var(--spacing-24)' }}>
             <SizeSelector
               sizes={product.sizes}
               selectedSize={selectedSize}
@@ -329,24 +326,23 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             />
           </div>
 
-          {/* 3. Quantity & Primary Add to Bag Pill CTA */}
+          {/* 3. Quantity & Warm Charcoal Primary CTA */}
           <div
             style={{
               display: 'flex',
               flexWrap: 'wrap',
               gap: 'var(--spacing-12)',
-              marginBottom: 'var(--spacing-30)',
+              marginBottom: 'var(--spacing-32)',
             }}
           >
-            {/* Pill Quantity Control */}
+            {/* 0px Quantity Stepper */}
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                border: '1px solid var(--color-lumera-statement)',
-                borderRadius: 'var(--radius-buttons)',
-                padding: '0 var(--spacing-12)',
-                height: '48px',
+                border: '1px solid var(--color-warm-charcoal)',
+                padding: '0 var(--spacing-8)',
+                height: '50px',
               }}
             >
               <button
@@ -356,21 +352,21 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--color-lumera-statement)',
+                  color: 'var(--color-soft-black)',
                   cursor: 'pointer',
                   padding: 'var(--spacing-8)',
                   display: 'flex',
                 }}
               >
-                <Minus size={15} />
+                <Minus size={14} />
               </button>
               <span
                 className="text-body-sm-editorial"
                 style={{
-                  minWidth: '32px',
+                  minWidth: '30px',
                   textAlign: 'center',
-                  fontWeight: 'var(--font-weight-bold)',
-                  color: 'var(--color-lumera-statement)',
+                  fontWeight: 'var(--font-weight-medium)',
+                  color: 'var(--color-soft-black)',
                 }}
               >
                 {quantity}
@@ -382,66 +378,63 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--color-lumera-statement)',
+                  color: 'var(--color-soft-black)',
                   cursor: 'pointer',
                   padding: 'var(--spacing-8)',
                   display: 'flex',
                 }}
               >
-                <Plus size={15} />
+                <Plus size={14} />
               </button>
             </div>
 
-            {/* Add to Bag Button */}
+            {/* Warm Charcoal Primary CTA Button */}
             <button
               type="button"
               onClick={handleAdd}
               className="pill-btn pill-btn--brand"
               style={{
                 flex: 1,
-                minWidth: '220px',
-                height: '48px',
+                minWidth: '210px',
+                height: '50px',
               }}
             >
               {addedFeedback ? (
                 <>
-                  <Check size={17} />
-                  <span>AÑADIDO A TU BOLSA</span>
+                  <Check size={15} />
+                  <span>ADDED TO CART</span>
                 </>
               ) : (
-                <>
-                  <ShoppingBag size={17} />
-                  <span>
-                    AÑADIR A LA BOLSA ·{' '}
-                    {CurrencyService.formatUSD(product.price * quantity)}
-                  </span>
-                </>
+                <span>
+                  ADD TO CART —{' '}
+                  {CurrencyService.formatUSD(product.price * quantity)} +
+                </span>
               )}
             </button>
 
-            {/* Wishlist Pill Button */}
+            {/* Wishlist Button */}
             <button
               type="button"
               onClick={() => onToggleWishlist(product.id)}
               aria-label="Guardar en favoritos"
               className="pill-btn pill-btn--outline"
               style={{
-                height: '48px',
-                padding: '0 var(--spacing-20)',
+                height: '50px',
+                padding: '0 18px',
               }}
             >
               <Heart
-                size={18}
-                fill={isWishlisted ? 'var(--color-lumera-statement)' : 'none'}
+                size={16}
+                fill={isWishlisted ? 'var(--color-soft-black)' : 'none'}
               />
             </button>
           </div>
 
-          {/* Editorial Information Tabs */}
+          {/* Spec Sheet Tabs */}
           <div
             style={{
-              borderTop: '1px solid var(--color-lumera-mist)',
-              paddingTop: 'var(--spacing-24)',
+              borderTop: '1px solid var(--color-warm-charcoal)',
+              paddingTop: 'var(--spacing-20)',
             }}
           >
             <div
@@ -459,7 +452,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   activeTab === 'description' ? 'is-selected' : ''
                 }`}
               >
-                DESCRIPCIÓN &amp; FIT
+                01 // DESCRIPTION &amp; FIT
               </button>
               <button
                 type="button"
@@ -468,7 +461,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   activeTab === 'specs' ? 'is-selected' : ''
                 }`}
               >
-                ESPECIFICACIONES
+                02 // TECHNICAL SPECS
               </button>
               <button
                 type="button"
@@ -477,9 +470,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   activeTab === 'composition' ? 'is-selected' : ''
                 }`}
               >
+                03 //{' '}
                 {product.department === 'makeup'
-                  ? 'INGREDIENTES & USO'
-                  : 'COMPOSICIÓN & CUIDADO'}
+                  ? 'FORMULA & USE'
+                  : 'COMPOSITION & CARE'}
               </button>
             </div>
 
@@ -487,37 +481,25 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               <div>
                 <p
                   style={{
-                    color: 'var(--color-carbon)',
+                    color: 'var(--color-soft-black)',
                     marginBottom: 'var(--spacing-16)',
-                    lineHeight: 1.6,
+                    lineHeight: 1.7,
                   }}
                 >
                   {product.description}
                 </p>
                 <div
                   style={{
-                    border: '1px solid var(--color-lumera-mist)',
-                    borderRadius: 'var(--radius-cards)',
+                    backgroundColor: 'var(--color-ash-gray)',
+                    borderLeft: '2px solid var(--color-warm-charcoal)',
                     padding: 'var(--spacing-16)',
-                    display: 'flex',
-                    gap: 'var(--spacing-12)',
-                    alignItems: 'flex-start',
                   }}
                 >
-                  <Sparkles
-                    size={18}
-                    style={{
-                      color: 'var(--color-lumera-statement)',
-                      flexShrink: 0,
-                      marginTop: '2px',
-                    }}
-                  />
                   <p
                     className="text-body-sm-editorial"
-                    style={{ color: 'var(--color-lumera-statement)' }}
+                    style={{ color: 'var(--color-soft-black)' }}
                   >
-                    <strong>NOTA EDITORIAL LUMÉRA:</strong>{' '}
-                    {product.editorialNote}
+                    <strong>STYLING NOTE //</strong> {product.editorialNote}
                   </p>
                 </div>
               </div>
@@ -538,19 +520,20 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                       display: 'flex',
                       justifyContent: 'space-between',
                       paddingBottom: 'var(--spacing-8)',
-                      borderBottom: '1px solid var(--color-lumera-mist)',
-                      fontSize: 'var(--text-body-sm)',
+                      borderBottom: '1px solid var(--color-ash-gray)',
+                      fontSize: '12px',
                     }}
                   >
                     <span
                       style={{
-                        color: 'var(--color-lumera-statement)',
-                        fontWeight: 'var(--font-weight-bold)',
+                        color: 'var(--color-soft-black)',
+                        fontWeight: 'var(--font-weight-medium)',
+                        textTransform: 'uppercase',
                       }}
                     >
                       {spec.label}
                     </span>
-                    <span style={{ color: 'var(--color-carbon)' }}>
+                    <span style={{ color: 'var(--color-soft-black)' }}>
                       {spec.value}
                     </span>
                   </div>
@@ -563,20 +546,20 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 'var(--spacing-12)',
+                  gap: 'var(--spacing-16)',
                 }}
               >
                 <div>
                   <h4
                     className="text-caption-editorial"
                     style={{
-                      color: 'var(--color-lumera-statement)',
-                      marginBottom: 'var(--spacing-6)',
+                      color: 'var(--color-soft-black)',
+                      marginBottom: 'var(--spacing-4)',
                     }}
                   >
                     {product.department === 'makeup'
-                      ? 'FÓRMULA E INGREDIENTES CLAVE'
-                      : 'MATERIALES Y COMPOSICIÓN TEXTIL'}
+                      ? 'ACTIVE INGREDIENTS'
+                      : 'TEXTILE COMPOSITION'}
                   </h4>
                   <p className="text-body-sm-editorial">
                     {product.compositionOrIngredients}
@@ -586,13 +569,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                   <h4
                     className="text-caption-editorial"
                     style={{
-                      color: 'var(--color-lumera-statement)',
-                      marginBottom: 'var(--spacing-6)',
+                      color: 'var(--color-soft-black)',
+                      marginBottom: 'var(--spacing-4)',
                     }}
                   >
                     {product.department === 'makeup'
-                      ? 'MODO DE APLICACIÓN RECOMENDADO'
-                      : 'INSTRUCCIONES DE CUIDADO'}
+                      ? 'APPLICATION PROTOCOL'
+                      : 'CARE INSTRUCTIONS'}
                   </h4>
                   <p className="text-body-sm-editorial">
                     {product.careOrHowToUse}
@@ -601,69 +584,38 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </div>
             )}
           </div>
-
-          {/* Boutique Guarantees */}
-          <div
-            style={{
-              marginTop: 'var(--spacing-24)',
-              paddingTop: 'var(--spacing-20)',
-              borderTop: '1px solid var(--color-lumera-mist)',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 'var(--spacing-12)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-10)',
-              }}
-            >
-              <Truck size={18} color="var(--color-lumera-statement)" />
-              <span className="text-caption-editorial">
-                ENVÍO GRATIS DESDE $180 USD
-              </span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-10)',
-              }}
-            >
-              <ShieldCheck size={18} color="var(--color-lumera-statement)" />
-              <span className="text-caption-editorial">
-                CAMBIO DE TALLA SIN COSTO
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Cross-Sell Section: Completa el Look */}
+      {/* Cross-Sell Section: Pair With */}
       <div
         style={{
           marginTop: 'var(--spacing-60)',
-          paddingTop: 'var(--spacing-50)',
-          borderTop: '1px solid var(--color-lumera-mist)',
+          paddingTop: 'var(--spacing-40)',
+          borderTop: '1px solid var(--color-warm-charcoal)',
         }}
       >
+        <p
+          className="text-caption-editorial"
+          style={{ textAlign: 'center', marginBottom: 'var(--spacing-8)' }}
+        >
+          RECOMMENDED PAIRING
+        </p>
         <h2
-          className="display-heading-sm"
+          className="display-heading"
           style={{
             textAlign: 'center',
-            marginBottom: 'var(--spacing-30)',
+            marginBottom: 'var(--spacing-32)',
           }}
         >
-          COMPLETA EL LOOK LUMÉRA
+          COMPLETE THE ARCHIVE LOOK
         </h2>
 
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 'var(--spacing-24)',
+            gap: 'var(--spacing-20)',
           }}
         >
           {relatedProducts.map((rel) => (
@@ -671,8 +623,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               key={rel.id}
               onClick={() => onSelectRelatedProduct(rel)}
               style={{
-                border: '1px solid var(--color-lumera-mist)',
-                borderRadius: 'var(--radius-cards)',
+                border: '1px solid var(--color-warm-charcoal)',
                 padding: 'var(--spacing-16)',
                 display: 'flex',
                 gap: 'var(--spacing-16)',
@@ -684,25 +635,25 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 src={rel.colors[0].images[0]}
                 alt={rel.name}
                 style={{
-                  width: 80,
-                  height: 104,
+                  width: 76,
+                  height: 100,
                   objectFit: 'cover',
-                  borderRadius: 'var(--radius-cards)',
                   flexShrink: 0,
                 }}
               />
               <div>
                 <span
                   className="text-caption-editorial"
-                  style={{ color: 'var(--color-lumera-statement)' }}
+                  style={{ color: 'var(--color-soft-black)', opacity: 0.6 }}
                 >
-                  {rel.categoryLabel}
+                  {rel.sku}
                 </span>
                 <h4
                   style={{
-                    fontFamily: 'var(--font-integral)',
-                    fontSize: '18px',
-                    color: 'var(--color-lumera-statement)',
+                    fontFamily: 'var(--font-gt-america-mono)',
+                    fontSize: '12px',
+                    fontWeight: 'var(--font-weight-medium)',
+                    color: 'var(--color-soft-black)',
                     margin: '4px 0',
                   }}
                 >
@@ -711,8 +662,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 <p
                   className="text-body-sm-editorial"
                   style={{
-                    fontWeight: 'var(--font-weight-bold)',
-                    color: 'var(--color-carbon)',
+                    color: 'var(--color-soft-black)',
                   }}
                 >
                   {CurrencyService.formatUSD(rel.price)}
@@ -725,4 +675,3 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
     </section>
   );
 };
-

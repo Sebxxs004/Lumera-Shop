@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { CheckCircle2, Minus, Plus, Trash2, X } from 'lucide-react';
 import { CurrencyService } from '../../services/currency.service';
 import { CartItem, CartSummary } from '../../types/cart.types';
 
@@ -15,8 +15,7 @@ interface CartDrawerProps {
 
 /**
  * CartDrawer
- * Single Responsibility: Slide-over shopping bag showing selected items,
- * chosen color/shade & size/format, free shipping progress, and order confirmation preview.
+ * Single Responsibility: Sharp 0px architectural shopping bag drawer per Skills/DESIGN2.md.
  */
 export const CartDrawer: React.FC<CartDrawerProps> = ({
   isOpen,
@@ -53,7 +52,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 110,
-        backgroundColor: 'rgba(27, 27, 27, 0.6)',
+        backgroundColor: 'rgba(21, 21, 21, 0.72)',
         display: 'flex',
         justifyContent: 'flex-end',
       }}
@@ -64,8 +63,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           width: '100%',
           maxWidth: '460px',
           height: '100%',
-          backgroundColor: 'var(--surface-paper-white-canvas)',
-          borderLeft: '2px solid var(--color-lumera-statement)',
+          backgroundColor: 'var(--color-pure-white)',
+          borderLeft: '1px solid var(--color-warm-charcoal)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -75,7 +74,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         <div
           style={{
             padding: 'var(--spacing-24)',
-            borderBottom: '1px solid var(--color-lumera-mist)',
+            borderBottom: '1px solid var(--color-warm-charcoal)',
           }}
         >
           <div
@@ -86,21 +85,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               marginBottom: 'var(--spacing-16)',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-10)',
-              }}
-            >
-              <ShoppingBag size={20} color="var(--color-lumera-statement)" />
-              <h2
-                className="display-heading-sm"
-                style={{ fontSize: '26px' }}
-              >
-                TU BOLSA ({summary.totalItems})
-              </h2>
-            </div>
+            <h2 className="display-heading-sm">
+              SHOPPING CART ({summary.totalItems})
+            </h2>
 
             <button
               type="button"
@@ -110,9 +97,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               }}
               aria-label="Cerrar bolsa"
               className="pill-btn pill-btn--outline"
-              style={{ padding: 'var(--spacing-8) var(--spacing-15)' }}
+              style={{ padding: '8px 12px' }}
             >
-              <X size={16} />
+              <X size={14} />
             </button>
           </div>
 
@@ -121,22 +108,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             <p
               className="text-caption-editorial"
               style={{
-                color: 'var(--color-lumera-statement)',
+                color: 'var(--color-soft-black)',
                 marginBottom: 'var(--spacing-8)',
               }}
             >
               {summary.remainingForFreeShipping === 0 && summary.subtotal > 0
-                ? '¡TIENES ENVÍO EXPRESS DE CORTESÍA DESBLOQUEADO!'
-                : `TE FALTAN ${CurrencyService.formatUSD(
+                ? 'COMPLIMENTARY EXPRESS SHIPPING UNLOCKED'
+                : `ADD ${CurrencyService.formatUSD(
                     summary.remainingForFreeShipping
-                  )} PARA ENVÍO EXPRESS GRATIS`}
+                  )} FOR COMPLIMENTARY SHIPPING`}
             </p>
             <div
               style={{
                 width: '100%',
-                height: '6px',
-                borderRadius: 'var(--radius-full)',
-                backgroundColor: 'var(--surface-fog-footer)',
+                height: '3px',
+                backgroundColor: 'var(--color-ash-gray)',
                 overflow: 'hidden',
               }}
             >
@@ -144,7 +130,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 style={{
                   width: `${progressPercentage}%`,
                   height: '100%',
-                  backgroundColor: 'var(--color-lumera-statement)',
+                  backgroundColor: 'var(--color-warm-charcoal)',
                   transition: 'width 0.3s ease',
                 }}
               />
@@ -168,26 +154,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               }}
             >
               <CheckCircle2
-                size={44}
-                color="var(--color-lumera-statement)"
+                size={38}
+                color="var(--color-warm-charcoal)"
                 style={{ margin: '0 auto var(--spacing-16)' }}
               />
               <h3
                 className="display-heading-sm"
                 style={{ marginBottom: 'var(--spacing-12)' }}
               >
-                ¡PEDIDO SIMULADO CON ÉXITO!
+                ORDER DISPATCH SIMULATED
               </h3>
               <p
                 className="text-body-sm-editorial"
                 style={{
-                  color: 'var(--color-carbon)',
+                  color: 'var(--color-soft-black)',
                   marginBottom: 'var(--spacing-24)',
                 }}
               >
-                Tu selección de prendas y maquillaje LUMÉRA está lista. Cuando
-                conectemos el backend de pagos e inventario, este flujo
-                procesará tu orden en tiempo real.
+                Tu selección de prendas y maquillaje LUMÉRA está lista. Al
+                conectar el backend de pagos e inventario, este flujo procesará
+                tu orden en tiempo real.
               </p>
               <button
                 type="button"
@@ -197,41 +183,41 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 }}
                 className="pill-btn pill-btn--brand"
               >
-                SEGUIR EXPLORANDO →
+                CONTINUE BROWSING
               </button>
             </div>
           ) : items.length === 0 ? (
             <div
               style={{
                 textAlign: 'center',
-                padding: 'var(--spacing-50) var(--spacing-16)',
+                padding: 'var(--spacing-56) var(--spacing-16)',
               }}
             >
               <p
                 className="text-caption-editorial"
                 style={{
-                  color: 'var(--color-lumera-statement)',
-                  marginBottom: 'var(--spacing-10)',
+                  color: 'var(--color-soft-black)',
+                  marginBottom: 'var(--spacing-8)',
                 }}
               >
-                TU BOLSA ESTÁ VACÍA
+                YOUR CART IS EMPTY
               </p>
               <p
                 className="text-body-sm-editorial"
                 style={{
-                  color: 'var(--color-carbon)',
+                  color: 'var(--color-soft-black)',
                   marginBottom: 'var(--spacing-24)',
                 }}
               >
                 Explora nuestros vestidos en satén, corsets sastre y maquillaje
-                luminoso seleccionando tu talla o tono favorito.
+                seleccionando tu talla o tono.
               </p>
               <button
                 type="button"
                 onClick={onClose}
                 className="pill-btn pill-btn--brand"
               >
-                DESCUBRIR COLECCIÓN →
+                DISCOVER COLLECTION
               </button>
             </div>
           ) : (
@@ -247,21 +233,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   key={item.cartItemId}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '80px 1fr',
+                    gridTemplateColumns: '76px 1fr',
                     gap: 'var(--spacing-16)',
                     paddingBottom: 'var(--spacing-20)',
-                    borderBottom: '1px solid var(--color-lumera-mist)',
+                    borderBottom: '1px solid var(--color-ash-gray)',
                   }}
                 >
                   <img
                     src={item.selectedColor.images[0]}
                     alt={item.product.name}
                     style={{
-                      width: 80,
-                      height: 106,
+                      width: 76,
+                      height: 102,
                       objectFit: 'cover',
-                      borderRadius: 'var(--radius-cards)',
-                      border: '1px solid var(--color-lumera-mist)',
                     }}
                   />
 
@@ -283,10 +267,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       >
                         <h4
                           style={{
-                            fontFamily: 'var(--font-integral)',
-                            fontSize: '17px',
-                            color: 'var(--color-lumera-statement)',
-                            lineHeight: 1.05,
+                            fontFamily: 'var(--font-gt-america-mono)',
+                            fontSize: '12px',
+                            fontWeight: 'var(--font-weight-medium)',
+                            color: 'var(--color-soft-black)',
+                            lineHeight: 1.35,
                           }}
                         >
                           {item.product.name}
@@ -298,11 +283,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           style={{
                             background: 'none',
                             border: 'none',
-                            color: 'var(--color-lumera-statement)',
+                            color: 'var(--color-soft-black)',
                             cursor: 'pointer',
                           }}
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
 
@@ -310,24 +295,23 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 'var(--spacing-6)',
-                          marginTop: 'var(--spacing-6)',
+                          gap: '6px',
+                          marginTop: '6px',
                         }}
                       >
                         <span
                           style={{
-                            width: 11,
-                            height: 11,
-                            borderRadius: 'var(--radius-full)',
+                            width: 10,
+                            height: 10,
                             backgroundColor: item.selectedColor.hex,
-                            border: '1px solid var(--color-lumera-mist)',
+                            border: '1px solid var(--color-soft-black)',
                           }}
                         />
                         <span
                           className="text-caption-editorial"
-                          style={{ color: 'var(--color-carbon)' }}
+                          style={{ color: 'var(--color-soft-black)' }}
                         >
-                          {item.selectedColor.name} · {item.selectedSize.label}
+                          {item.selectedColor.name} // {item.selectedSize.label}
                         </span>
                       </div>
                     </div>
@@ -340,14 +324,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         marginTop: 'var(--spacing-12)',
                       }}
                     >
-                      {/* Mini Pill Quantity Stepper */}
+                      {/* 0px Quantity Stepper */}
                       <div
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          border: '1px solid var(--color-lumera-statement)',
-                          borderRadius: 'var(--radius-buttons)',
-                          padding: '2px 8px',
+                          border: '1px solid var(--color-warm-charcoal)',
+                          padding: '2px 6px',
                         }}
                       >
                         <button
@@ -358,19 +341,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           style={{
                             background: 'none',
                             border: 'none',
-                            color: 'var(--color-lumera-statement)',
+                            color: 'var(--color-soft-black)',
                             cursor: 'pointer',
                             padding: '4px',
                           }}
                         >
-                          <Minus size={12} />
+                          <Minus size={11} />
                         </button>
                         <span
                           className="text-caption-editorial"
                           style={{
                             minWidth: 22,
                             textAlign: 'center',
-                            color: 'var(--color-lumera-statement)',
+                            color: 'var(--color-soft-black)',
                           }}
                         >
                           {item.quantity}
@@ -383,20 +366,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           style={{
                             background: 'none',
                             border: 'none',
-                            color: 'var(--color-lumera-statement)',
+                            color: 'var(--color-soft-black)',
                             cursor: 'pointer',
                             padding: '4px',
                           }}
                         >
-                          <Plus size={12} />
+                          <Plus size={11} />
                         </button>
                       </div>
 
                       <span
                         className="text-body-sm-editorial"
                         style={{
-                          fontWeight: 'var(--font-weight-bold)',
-                          color: 'var(--color-lumera-statement)',
+                          fontWeight: 'var(--font-weight-medium)',
+                          color: 'var(--color-soft-black)',
                         }}
                       >
                         {CurrencyService.formatUSD(
@@ -416,8 +399,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div
             style={{
               padding: 'var(--spacing-24)',
-              backgroundColor: 'var(--surface-fog-footer)',
-              borderTop: '1px solid var(--color-lumera-mist)',
+              backgroundColor: 'var(--color-ash-gray)',
+              borderTop: '1px solid var(--color-warm-charcoal)',
             }}
           >
             <div
@@ -427,7 +410,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 marginBottom: 'var(--spacing-8)',
               }}
             >
-              <span className="text-body-sm-editorial">Subtotal</span>
+              <span className="text-caption-editorial">SUBTOTAL</span>
               <span className="text-body-sm-editorial">
                 {CurrencyService.formatUSD(summary.subtotal)}
               </span>
@@ -439,10 +422,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 marginBottom: 'var(--spacing-16)',
               }}
             >
-              <span className="text-body-sm-editorial">Envío Boutique</span>
-              <span className="text-body-sm-editorial">
+              <span className="text-caption-editorial">SHIPPING</span>
+              <span className="text-caption-editorial">
                 {summary.shippingCost === 0
-                  ? 'CORTESÍA (GRATIS)'
+                  ? 'COMPLIMENTARY ($0)'
                   : CurrencyService.formatUSD(summary.shippingCost)}
               </span>
             </div>
@@ -451,18 +434,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'baseline',
                 paddingTop: 'var(--spacing-12)',
                 marginBottom: 'var(--spacing-20)',
-                borderTop: '1px solid var(--color-lumera-mist)',
-                fontWeight: 'var(--font-weight-bold)',
+                borderTop: '1px solid var(--color-warm-charcoal)',
               }}
             >
-              <span className="text-caption-editorial">TOTAL ESTIMADO</span>
+              <span className="text-caption-editorial">ESTIMATED TOTAL</span>
               <span
                 style={{
-                  fontFamily: 'var(--font-integral)',
-                  fontSize: '24px',
-                  color: 'var(--color-lumera-statement)',
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '18px',
+                  fontWeight: 'var(--font-weight-medium)',
+                  color: 'var(--color-soft-black)',
                 }}
               >
                 {CurrencyService.formatUSD(summary.total)}
@@ -475,7 +459,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               className="pill-btn pill-btn--brand"
               style={{ width: '100%' }}
             >
-              FINALIZAR PEDIDO →
+              PROCEED TO CHECKOUT
             </button>
           </div>
         )}
@@ -483,4 +467,3 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     </div>
   );
 };
-

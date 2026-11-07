@@ -10,8 +10,9 @@ interface SectionHeadingProps {
 
 /**
  * SectionHeading
- * Single Responsibility: Renders editorial display headings per DESIGN.md
- * (Integral 35-45px weight 400, uppercase, tight line-height 0.92-1.0).
+ * Single Responsibility: Two-tier architectural section header per Skills/DESIGN2.md
+ * - Eyebrow: GT America Mono 10px, letter-spacing 0.093em, #151515, uppercase
+ * - Heading: Nimbus Sans Extended weight 700, 40px, letter-spacing 4px, #151515, uppercase
  */
 export const SectionHeading: React.FC<SectionHeadingProps> = ({
   eyebrow,
@@ -31,16 +32,19 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     <div
       style={{
         textAlign: align,
-        maxWidth: align === 'center' ? '760px' : '100%',
-        margin: align === 'center' ? '0 auto var(--spacing-30)' : '0 0 var(--spacing-30)',
+        maxWidth: align === 'center' ? '740px' : '100%',
+        margin:
+          align === 'center'
+            ? '0 auto var(--spacing-36)'
+            : '0 0 var(--spacing-36)',
       }}
     >
       {eyebrow && (
         <p
           className="text-caption-editorial"
           style={{
-            color: 'var(--color-lumera-statement)',
-            marginBottom: 'var(--spacing-10)',
+            color: 'var(--color-soft-black)',
+            marginBottom: 'var(--spacing-8)',
           }}
         >
           {eyebrow}
@@ -51,8 +55,9 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
         <p
           className="text-body-sm-editorial"
           style={{
-            color: 'var(--color-carbon)',
+            color: 'var(--color-soft-black)',
             marginTop: 'var(--spacing-12)',
+            opacity: 0.8,
           }}
         >
           {subtitle}
@@ -61,4 +66,3 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     </div>
   );
 };
-
