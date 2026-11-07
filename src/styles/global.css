@@ -334,6 +334,17 @@ a {
   gap: var(--spacing-12);
 }
 
+@keyframes megaMenuSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Tablet Breakpoint (<= 960px) */
 @media (max-width: 960px) {
   .desktop-nav {

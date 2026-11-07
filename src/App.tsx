@@ -100,7 +100,23 @@ export const App: React.FC = () => {
   const handleNavigateCategory = (category: ProductCategorySlug) => {
     setSelectedProductState(null);
     setShowingWishlistOnly(false);
+    setSearchQuery('');
     setCategory(category);
+    setTimeout(scrollToCatalog, 80);
+  };
+
+  const handleNavigateSearchFilter = (
+    query: string,
+    department?: ProductDepartment
+  ) => {
+    setSelectedProductState(null);
+    setShowingWishlistOnly(false);
+    if (department) {
+      setDepartment(department);
+    } else {
+      setDepartment('all');
+    }
+    setSearchQuery(query);
     setTimeout(scrollToCatalog, 80);
   };
 
@@ -138,6 +154,8 @@ export const App: React.FC = () => {
           showingWishlistOnly={showingWishlistOnly}
           onSelectDepartment={handleNavigateDepartment}
           onSelectCategory={handleNavigateCategory}
+          onSelectSearchFilter={handleNavigateSearchFilter}
+          onSelectProduct={(product) => handleOpenProductDetail(product)}
           onToggleSearch={() => {
             setSelectedProductState(null);
             setIsSearchExpanded((prev) => !prev);

@@ -1,6 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
-import { ProductCategorySlug, ProductDepartment } from '../../types/product.types';
+import {
+  MegaMenuFeaturedCard,
+  MegaMenuSubcategoryItem,
+  NAVIGATION_SECTIONS,
+  NavSectionId,
+} from '../../data/navigation.data';
+import { ProductService } from '../../services/product.service';
+import {
+  Product,
+  ProductCategorySlug,
+  ProductDepartment,
+} from '../../types/product.types';
+import { NavbarMegaMenu } from './NavbarMegaMenu';
 
 interface HeaderNavigationProps {
   activeDepartment: ProductDepartment;
@@ -8,21 +20,22 @@ interface HeaderNavigationProps {
   cartCount: number;
   wishlistCount: number;
   isSearchOpen: boolean;
+  showingWishlistOnly: boolean;
   onSelectDepartment: (dept: ProductDepartment) => void;
   onSelectCategory: (cat: ProductCategorySlug) => void;
+  onSelectSearchFilter?: (query: string, dept?: ProductDepartment) => void;
+  onSelectProduct?: (product: Product) => void;
   onToggleSearch: () => void;
   onOpenCart: () => void;
   onOpenSizeGuide: () => void;
   onFilterWishlistedOnly: () => void;
-  showingWishlistOnly: boolean;
 }
 
 /**
  * HeaderNavigation
- * Single Responsibility: Exact ALIGNE-style 3-zone top navigation bar:
- * - Far Left: Brand Logo (/assets/LUMERA-PNG.png)
- * - Center: 5 uppercase navigation links (NEW ARRIVALS, SHOP, COLLECTIONS, THE GET UP, OUR STORY)
- * - Far Right: USD $ + minimal stroke icons (Search, Account/Saved, Shopping Bag)
+ * Single Responsibility: Implements the ALIGNE 3-zone top navigation bar with:
+ * 1. Smoothly sliding horizontal indicator bar that glides across navbar links on hover/active
+ * 2. Full-width Mega Menu deployment with left-hand subcategories and 3 right-hand Bestseller portrait cards
  */
 export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   activeDepartment,
@@ -30,83 +43,102 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
   cartCount,
   wishlistCount,
   isSearchOpen,
+  showingWishlistOnly,
   onSelectDepartment,
   onSelectCategory,
+  onSelectSearchFilter,
+  onSelectProduct,
   onToggleSearch,
   onOpenCart,
   onOpenSizeGuide,
   onFilterWishlistedOnly,
-  showingWishlistOnly,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openSectionId, setOpenSectionId] = useState<NavSectionId | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+    opacity: number;
+  }>({ left: 0, width: 0, opacity: 0 });
 
-  const navItems: Array<{
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-  }> = [
-    {
-      label: 'NEW ARRIVALS',
-      isActive:
-        activeDepartment === 'all' &&
-        activeCategory === 'all' &&
-        !showingWishlistOnly,
-      onClick: () => {
-        onSelectDepartment('all');
-        setIsMobileMenuOpen(false);
-      },
-    },
-    {
-      label: 'SHOP BOUTIQUE',
-      isActive: activeDepartment === 'boutique' && !showingWishlistOnly,
-      onClick: () => {
-        onSelectDepartment('boutique');
-        setIsMobileMenuOpen(false);
-      },
-    },
-    {
-      label: 'MAQUILLAJE',
-      isActive: activeDepartment === 'makeup' && !showingWishlistOnly,
-      onClick: () => {
-        onSelectDepartment('makeup');
-        setIsMobileMenuOpen(false);
-      },
-    },
-    {
-      label: 'COLLECTIONS',
-      isActive:
-        activeCategory === 'vestidos-conjuntos' && !showingWishlistOnly,
-      onClick: () => {
-        onSelectCategory('vestidos-conjuntos');
-        setIsMobileMenuOpen(false);
-      },
-    },
-    {
-      label: 'SIZE SPEC',
-      isActive: false,
-      onClick: () => {
-        onOpenSizeGuide();
-        setIsMobileMenuOpen(false);
-      },
-    },
-  ];
+  const navContainerRef = useRef<HTMLElement | null>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const centerNavLinkStyle = (isActive = false): React.CSSProperties => ({
-    background: 'none',
-    border: 'none',
-    borderBottom: isActive
-      ? '1px solid var(--color-soft-black)'
-      : '1px solid transparent',
-    padding: '4px 0',
-    fontFamily: 'var(--font-gt-america-mono)',
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '0.11em',
-    textTransform: 'uppercase',
-    color: 'var(--color-soft-black)',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-  });
+  // Determine which nav section is currently active based on filters
+  const activeSectionId: NavSectionId = (() => {
+    if (showingWishlistOnly) return 'new-arrivals';
+    if (activeDepartment === 'boutique') return 'boutique';
+    if (activeDepartment === 'makeup') return 'makeup';
+    if (activeCategory !== 'all') return 'collections';
+    return 'new-arrivals';
+  })();
+
+  // Target section for the sliding bar: hovered section takes priority over active section
+  const targetSectionId = openSectionId ?? activeSectionId;
+
+  const updateSlidingIndicator = (sectionId: NavSectionId | null) => {
+    if (!sectionId || !navContainerRef.current) {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+      return;
+    }
+    const btn = buttonRefs.current[sectionId];
+    if (!btn) return;
+    setIndicatorStyle({
+      left: btn.offsetLeft,
+      width: btn.offsetWidth,
+      opacity: 1,
+    });
+  };
+
+  useEffect(() => {
+    updateSlidingIndicator(targetSectionId);
+    const handleResize = () => updateSlidingIndicator(targetSectionId);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [targetSectionId]);
+
+  const handleTopNavClick = (sectionId: NavSectionId) => {
+    if (sectionId === 'new-arrivals') {
+      onSelectDepartment('all');
+    } else if (sectionId === 'boutique') {
+      onSelectDepartment('boutique');
+    } else if (sectionId === 'makeup') {
+      onSelectDepartment('makeup');
+    } else if (sectionId === 'collections') {
+      onSelectCategory('vestidos-conjuntos');
+    } else if (sectionId === 'our-story') {
+      onOpenSizeGuide();
+    }
+    setOpenSectionId(null);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleSubcategoryClick = (item: MegaMenuSubcategoryItem) => {
+    if (item.openSizeGuide) {
+      onOpenSizeGuide();
+    } else if (item.searchQuery && onSelectSearchFilter) {
+      onSelectSearchFilter(item.searchQuery, item.department);
+    } else if (item.category) {
+      onSelectCategory(item.category);
+    } else if (item.department) {
+      onSelectDepartment(item.department);
+    }
+    setOpenSectionId(null);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleFeaturedCardClick = (card: MegaMenuFeaturedCard) => {
+    const product = ProductService.getProductById(card.productId);
+    if (product && onSelectProduct) {
+      onSelectProduct(product);
+    }
+    setOpenSectionId(null);
+    setIsMobileMenuOpen(false);
+  };
+
+  const activeMegaMenuSection = openSectionId
+    ? NAVIGATION_SECTIONS.find((sec) => sec.id === openSectionId) ?? null
+    : null;
 
   const iconBtnStyle: React.CSSProperties = {
     background: 'none',
@@ -122,12 +154,16 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
 
   return (
     <header
+      onMouseLeave={() => setOpenSectionId(null)}
       style={{
         width: '100%',
-        backgroundColor: 'transparent',
+        backgroundColor: activeMegaMenuSection
+          ? 'var(--color-pure-white)'
+          : 'transparent',
         padding: '22px clamp(16px, 3.5vw, 44px)',
         position: 'relative',
-        zIndex: 80,
+        zIndex: 90,
+        transition: 'background-color 0.2s ease',
       }}
     >
       <div
@@ -144,6 +180,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
             type="button"
             onClick={() => {
               onSelectDepartment('all');
+              setOpenSectionId(null);
               setIsMobileMenuOpen(false);
             }}
             aria-label="Ir al inicio de LUMÉRA"
@@ -167,25 +204,77 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
           </button>
         </div>
 
-        {/* 2. Dead Center: 5 Uppercase Navigation Links */}
+        {/* 2. Dead Center: 5 Uppercase Navigation Links + Sliding Bar */}
         <nav
+          ref={navContainerRef}
           aria-label="Navegación principal"
           className="desktop-nav"
           style={{
+            position: 'relative',
             justifyContent: 'center',
-            gap: 'clamp(20px, 2.8vw, 38px)',
+            gap: 'clamp(22px, 2.8vw, 38px)',
+            paddingBottom: '6px',
           }}
         >
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={item.onClick}
-              style={centerNavLinkStyle(item.isActive)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {NAVIGATION_SECTIONS.map((sec) => {
+            const isHoveredOrOpen = openSectionId === sec.id;
+            const isHighlighted =
+              isHoveredOrOpen || (!openSectionId && activeSectionId === sec.id);
+
+            return (
+              <button
+                key={sec.id}
+                ref={(el) => {
+                  buttonRefs.current[sec.id] = el;
+                }}
+                type="button"
+                onMouseEnter={() => setOpenSectionId(sec.id)}
+                onFocus={() => setOpenSectionId(sec.id)}
+                onClick={() => handleTopNavClick(sec.id)}
+                aria-expanded={isHoveredOrOpen}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '6px 0',
+                  fontFamily: 'var(--font-gt-america-mono)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  letterSpacing: '0.11em',
+                  textTransform: 'uppercase',
+                  color: isHoveredOrOpen
+                    ? 'var(--color-signal-blue)'
+                    : isHighlighted
+                    ? 'var(--color-soft-black)'
+                    : 'var(--color-soft-black)',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'color 0.2s ease',
+                }}
+              >
+                {sec.label}
+              </button>
+            );
+          })}
+
+          {/* Sliding Horizontal Bar that glides across navbar options */}
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              height: '2px',
+              width: `${indicatorStyle.width}px`,
+              transform: `translateX(${indicatorStyle.left}px)`,
+              backgroundColor: openSectionId
+                ? 'var(--color-signal-blue)'
+                : 'var(--color-soft-black)',
+              opacity: indicatorStyle.opacity,
+              transition:
+                'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), width 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, opacity 0.2s ease',
+              pointerEvents: 'none',
+            }}
+          />
         </nav>
 
         {/* 3. Far Right: USD $ + Search Icon + User/Saved Icon + Bag Icon */}
@@ -287,7 +376,17 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
+      {/* Desktop Full-Width Mega Menu Dropdown */}
+      {activeMegaMenuSection && (
+        <NavbarMegaMenu
+          section={activeMegaMenuSection}
+          onSelectSubcategory={handleSubcategoryClick}
+          onSelectFeaturedCard={handleFeaturedCardClick}
+          onClose={() => setOpenSectionId(null)}
+        />
+      )}
+
+      {/* Mobile Navigation Drawer with Subcategories */}
       {isMobileMenuOpen && (
         <div
           style={{
@@ -301,25 +400,64 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 'var(--spacing-8)',
+              gap: 'var(--spacing-12)',
             }}
           >
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={item.onClick}
-                className={`pill-btn ${
-                  item.isActive ? 'pill-btn--brand' : 'pill-btn--outline'
-                }`}
+            {NAVIGATION_SECTIONS.map((sec) => (
+              <div
+                key={sec.id}
                 style={{
-                  width: '100%',
-                  justifyContent: 'space-between',
+                  borderBottom: '1px solid var(--border-hairline)',
+                  paddingBottom: 'var(--spacing-12)',
                 }}
               >
-                <span>{item.label}</span>
-                <span>+</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleTopNavClick(sec.id)}
+                  style={{
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    padding: '4px 0',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontFamily: 'var(--font-gt-america-mono)',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-soft-black)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>{sec.label}</span>
+                  <span>→</span>
+                </button>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    marginTop: '8px',
+                  }}
+                >
+                  {sec.subcategories.slice(0, 5).map((sub) => (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => handleSubcategoryClick(sub)}
+                      className="pill-btn pill-btn--outline"
+                      style={{
+                        padding: '5px 10px',
+                        fontSize: '10px',
+                      }}
+                    >
+                      {sub.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
