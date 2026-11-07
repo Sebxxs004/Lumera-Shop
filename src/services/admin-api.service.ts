@@ -4,15 +4,48 @@ import {
   LoginResponsePayload,
 } from '../types/admin.types';
 import { Product, SubcategoryDefinition } from '../types/product.types';
+import { LocalBackendFallbackService } from './local-backend-fallback.service';
 import { ProductService } from './product.service';
 
 const TOKEN_STORAGE_KEY = 'lumera_atelier_jwt_v1';
+
+async function safeReadJson<T>(
+  res: Response
+): Promise<{ parsed: T | null; isStaticOrMissingApi: boolean }> {
+  const contentType = res.headers.get('content-type') ?? '';
+  if (
+    res.status === 405 ||
+    res.status === 404 ||
+    contentType.includes('text/html')
+  ) {
+    return { parsed: null, isStaticOrMissingApi: true };
+  }
+
+  try {
+    const text = await res.text();
+    if (!text.trim()) {
+      return {
+        parsed: null,
+        isStaticOrMissingApi: res.status === 405 || res.status === 404,
+      };
+    }
+    return {
+      parsed: JSON.parse(text) as T,
+      isStaticOrMissingApi: false,
+    };
+  } catch {
+    return {
+      parsed: null,
+      isStaticOrMissingApi: true,
+    };
+  }
+}
 
 /**
  * AdminApiService
  * Single Responsibility: Client-side HTTP gateway for authenticated admin operations.
  * Attaches cryptographically signed JWT tokens (`Authorization: Bearer <token>`)
- * to all modification requests and refreshes the public storefront state upon mutation.
+ * to all modification requests and safely falls back when served from a static host.
  */
 export const AdminApiService = {
   getStoredToken(): string | null {
@@ -51,25 +84,46 @@ export const AdminApiService = {
     email: string,
     password: string
   ): Promise<LoginResponsePayload> {
-    const res = await fetch('/api/v1/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = (await res.json()) as LoginResponsePayload & {
-      error?: string;
-    };
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<
+        LoginResponsePayload & { error?: string }
+      >(res);
 
-    if (!res.ok || !data.token) {
-      throw new Error(data.error ?? 'Error al iniciar sesión.');
+      if (isStaticOrMissingApi) {
+        const fallbackLogin = await LocalBackendFallbackService.login(
+          email,
+          password
+        );
+        this.setStoredToken(fallbackLogin.token);
+        return fallbackLogin;
+      }
+
+      if (!res.ok || !parsed?.token) {
+        throw new Error(parsed?.error ?? 'Error al iniciar sesión.');
+      }
+
+      this.setStoredToken(parsed.token);
+      return parsed;
+    } catch (err) {
+      if (err instanceof TypeError) {
+        const fallbackLogin = await LocalBackendFallbackService.login(
+          email,
+          password
+        );
+        this.setStoredToken(fallbackLogin.token);
+        return fallbackLogin;
+      }
+      throw err;
     }
-
-    this.setStoredToken(data.token);
-    return data;
   },
 
   async verifySession(): Promise<AdminUserProfile | null> {
@@ -81,14 +135,23 @@ export const AdminApiService = {
         method: 'GET',
         headers: this.buildAuthHeaders(),
       });
-      if (!res.ok) {
+
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        user?: AdminUserProfile;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        return LocalBackendFallbackService.verifyToken(token);
+      }
+
+      if (!res.ok || !parsed?.user) {
         this.setStoredToken(null);
         return null;
       }
-      const data = (await res.json()) as { user: AdminUserProfile };
-      return data.user;
+
+      return parsed.user;
     } catch {
-      return null;
+      return LocalBackendFallbackService.verifyToken(token);
     }
   },
 
@@ -97,17 +160,32 @@ export const AdminApiService = {
   },
 
   async fetchAdminCatalog(): Promise<AdminCatalogResponse> {
-    const res = await fetch('/api/v1/admin/catalog', {
-      method: 'GET',
-      headers: this.buildAuthHeaders(),
-    });
-    const data = (await res.json()) as AdminCatalogResponse & {
-      error?: string;
-    };
-    if (!res.ok) {
-      throw new Error(data.error ?? 'No se pudo cargar el catálogo de administración.');
+    try {
+      const res = await fetch('/api/v1/admin/catalog', {
+        method: 'GET',
+        headers: this.buildAuthHeaders(),
+      });
+
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<
+        AdminCatalogResponse & { error?: string }
+      >(res);
+
+      if (
+        isStaticOrMissingApi ||
+        LocalBackendFallbackService.hasLocalOverrides()
+      ) {
+        return LocalBackendFallbackService.getAdminCatalog();
+      }
+
+      if (!res.ok || !parsed) {
+        throw new Error(
+          parsed?.error ?? 'No se pudo cargar el catálogo de administración.'
+        );
+      }
+      return parsed;
+    } catch {
+      return LocalBackendFallbackService.getAdminCatalog();
     }
-    return data;
   },
 
   async uploadImageFile(file: File): Promise<string> {
@@ -118,81 +196,163 @@ export const AdminApiService = {
       reader.readAsDataURL(file);
     });
 
-    const res = await fetch('/api/v1/admin/uploads', {
-      method: 'POST',
-      headers: this.buildAuthHeaders(),
-      body: JSON.stringify({
-        dataUrl,
-        fileName: file.name,
-      }),
-    });
+    try {
+      const res = await fetch('/api/v1/admin/uploads', {
+        method: 'POST',
+        headers: this.buildAuthHeaders(),
+        body: JSON.stringify({
+          dataUrl,
+          fileName: file.name,
+        }),
+      });
 
-    const data = (await res.json()) as { url?: string; error?: string };
-    if (!res.ok || !data.url) {
-      throw new Error(data.error ?? 'Error al subir la imagen al servidor.');
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        url?: string;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        return dataUrl;
+      }
+
+      if (!res.ok || !parsed?.url) {
+        throw new Error(
+          parsed?.error ?? 'Error al subir la imagen al servidor.'
+        );
+      }
+
+      return parsed.url;
+    } catch {
+      return dataUrl;
     }
-
-    return data.url;
   },
 
   async createProduct(payload: Partial<Product>): Promise<Product> {
-    const res = await fetch('/api/v1/admin/products', {
-      method: 'POST',
-      headers: this.buildAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch('/api/v1/admin/products', {
+        method: 'POST',
+        headers: this.buildAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
 
-    const data = (await res.json()) as { product?: Product; error?: string };
-    if (!res.ok || !data.product) {
-      throw new Error(data.error ?? 'Error al crear el producto.');
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        product?: Product;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        const created =
+          await LocalBackendFallbackService.createProduct(payload);
+        await ProductService.refreshFromBackend();
+        return created;
+      }
+
+      if (!res.ok || !parsed?.product) {
+        throw new Error(parsed?.error ?? 'Error al crear el producto.');
+      }
+
+      await ProductService.refreshFromBackend();
+      return parsed.product;
+    } catch (err) {
+      if (err instanceof TypeError) {
+        const created =
+          await LocalBackendFallbackService.createProduct(payload);
+        await ProductService.refreshFromBackend();
+        return created;
+      }
+      throw err;
     }
-
-    await ProductService.refreshFromBackend();
-    return data.product;
   },
 
   async updateProduct(
     productId: string,
     payload: Partial<Product>
   ): Promise<Product> {
-    const res = await fetch(
-      `/api/v1/admin/products/${encodeURIComponent(productId)}`,
-      {
-        method: 'PUT',
-        headers: this.buildAuthHeaders(),
-        body: JSON.stringify(payload),
+    try {
+      const res = await fetch(
+        `/api/v1/admin/products/${encodeURIComponent(productId)}`,
+        {
+          method: 'PUT',
+          headers: this.buildAuthHeaders(),
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        product?: Product;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        const updated = await LocalBackendFallbackService.updateProduct(
+          productId,
+          payload
+        );
+        await ProductService.refreshFromBackend();
+        return updated;
       }
-    );
 
-    const data = (await res.json()) as { product?: Product; error?: string };
-    if (!res.ok || !data.product) {
-      throw new Error(data.error ?? 'Error al actualizar el producto.');
+      if (!res.ok || !parsed?.product) {
+        throw new Error(parsed?.error ?? 'Error al actualizar el producto.');
+      }
+
+      await ProductService.refreshFromBackend();
+      return parsed.product;
+    } catch (err) {
+      if (err instanceof TypeError) {
+        const updated = await LocalBackendFallbackService.updateProduct(
+          productId,
+          payload
+        );
+        await ProductService.refreshFromBackend();
+        return updated;
+      }
+      throw err;
     }
-
-    await ProductService.refreshFromBackend();
-    return data.product;
   },
 
   async toggleProductVisibility(
     productId: string,
     isVisible: boolean
   ): Promise<Product> {
-    const res = await fetch(
-      `/api/v1/admin/products/${encodeURIComponent(productId)}/visibility`,
-      {
-        method: 'PATCH',
-        headers: this.buildAuthHeaders(),
-        body: JSON.stringify({ isVisible }),
+    try {
+      const res = await fetch(
+        `/api/v1/admin/products/${encodeURIComponent(productId)}/visibility`,
+        {
+          method: 'PATCH',
+          headers: this.buildAuthHeaders(),
+          body: JSON.stringify({ isVisible }),
+        }
+      );
+
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        product?: Product;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        const updated = await LocalBackendFallbackService.toggleVisibility(
+          productId,
+          isVisible
+        );
+        await ProductService.refreshFromBackend();
+        return updated;
       }
-    );
 
-    const data = (await res.json()) as { product?: Product; error?: string };
-    if (!res.ok || !data.product) {
-      throw new Error(data.error ?? 'Error al cambiar visibilidad.');
+      if (!res.ok || !parsed?.product) {
+        throw new Error(parsed?.error ?? 'Error al cambiar visibilidad.');
+      }
+
+      await ProductService.refreshFromBackend();
+      return parsed.product;
+    } catch {
+      const updated = await LocalBackendFallbackService.toggleVisibility(
+        productId,
+        isVisible
+      );
+      await ProductService.refreshFromBackend();
+      return updated;
     }
-
-    await ProductService.refreshFromBackend();
-    return data.product;
   },
 
   async updateVariantStock(params: {
@@ -201,40 +361,64 @@ export const AdminApiService = {
     sizeLabel?: string;
     stock: number;
   }): Promise<Product> {
-    const res = await fetch(
-      `/api/v1/admin/products/${encodeURIComponent(params.productId)}/stock`,
-      {
-        method: 'PATCH',
-        headers: this.buildAuthHeaders(),
-        body: JSON.stringify({
-          colorId: params.colorId,
-          sizeLabel: params.sizeLabel,
-          stock: params.stock,
-        }),
+    try {
+      const res = await fetch(
+        `/api/v1/admin/products/${encodeURIComponent(params.productId)}/stock`,
+        {
+          method: 'PATCH',
+          headers: this.buildAuthHeaders(),
+          body: JSON.stringify({
+            colorId: params.colorId,
+            sizeLabel: params.sizeLabel,
+            stock: params.stock,
+          }),
+        }
+      );
+
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        product?: Product;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        const updated =
+          await LocalBackendFallbackService.updateVariantStock(params);
+        await ProductService.refreshFromBackend();
+        return updated;
       }
-    );
 
-    const data = (await res.json()) as { product?: Product; error?: string };
-    if (!res.ok || !data.product) {
-      throw new Error(data.error ?? 'Error al actualizar stock.');
+      if (!res.ok || !parsed?.product) {
+        throw new Error(parsed?.error ?? 'Error al actualizar stock.');
+      }
+
+      await ProductService.refreshFromBackend();
+      return parsed.product;
+    } catch {
+      const updated =
+        await LocalBackendFallbackService.updateVariantStock(params);
+      await ProductService.refreshFromBackend();
+      return updated;
     }
-
-    await ProductService.refreshFromBackend();
-    return data.product;
   },
 
   async deleteProduct(productId: string): Promise<void> {
-    const res = await fetch(
-      `/api/v1/admin/products/${encodeURIComponent(productId)}`,
-      {
-        method: 'DELETE',
-        headers: this.buildAuthHeaders(),
-      }
-    );
+    try {
+      const res = await fetch(
+        `/api/v1/admin/products/${encodeURIComponent(productId)}`,
+        {
+          method: 'DELETE',
+          headers: this.buildAuthHeaders(),
+        }
+      );
 
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      throw new Error(data.error ?? 'Error al eliminar producto.');
+      const { isStaticOrMissingApi } = await safeReadJson(res);
+      if (isStaticOrMissingApi) {
+        await LocalBackendFallbackService.deleteProduct(productId);
+        await ProductService.refreshFromBackend();
+        return;
+      }
+    } catch {
+      await LocalBackendFallbackService.deleteProduct(productId);
     }
 
     await ProductService.refreshFromBackend();
@@ -243,61 +427,99 @@ export const AdminApiService = {
   async createSubcategory(
     payload: Partial<SubcategoryDefinition>
   ): Promise<SubcategoryDefinition> {
-    const res = await fetch('/api/v1/admin/subcategories', {
-      method: 'POST',
-      headers: this.buildAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch('/api/v1/admin/subcategories', {
+        method: 'POST',
+        headers: this.buildAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
 
-    const data = (await res.json()) as {
-      subcategory?: SubcategoryDefinition;
-      error?: string;
-    };
-    if (!res.ok || !data.subcategory) {
-      throw new Error(data.error ?? 'Error al crear subcategoría.');
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        subcategory?: SubcategoryDefinition;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        const created =
+          await LocalBackendFallbackService.createSubcategory(payload);
+        await ProductService.refreshFromBackend();
+        return created;
+      }
+
+      if (!res.ok || !parsed?.subcategory) {
+        throw new Error(parsed?.error ?? 'Error al crear subcategoría.');
+      }
+
+      await ProductService.refreshFromBackend();
+      return parsed.subcategory;
+    } catch {
+      const created =
+        await LocalBackendFallbackService.createSubcategory(payload);
+      await ProductService.refreshFromBackend();
+      return created;
     }
-
-    await ProductService.refreshFromBackend();
-    return data.subcategory;
   },
 
   async updateSubcategory(
     id: string,
     payload: Partial<SubcategoryDefinition>
   ): Promise<SubcategoryDefinition> {
-    const res = await fetch(
-      `/api/v1/admin/subcategories/${encodeURIComponent(id)}`,
-      {
-        method: 'PUT',
-        headers: this.buildAuthHeaders(),
-        body: JSON.stringify(payload),
+    try {
+      const res = await fetch(
+        `/api/v1/admin/subcategories/${encodeURIComponent(id)}`,
+        {
+          method: 'PUT',
+          headers: this.buildAuthHeaders(),
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const { parsed, isStaticOrMissingApi } = await safeReadJson<{
+        subcategory?: SubcategoryDefinition;
+        error?: string;
+      }>(res);
+
+      if (isStaticOrMissingApi) {
+        const updated = await LocalBackendFallbackService.updateSubcategory(
+          id,
+          payload
+        );
+        await ProductService.refreshFromBackend();
+        return updated;
       }
-    );
 
-    const data = (await res.json()) as {
-      subcategory?: SubcategoryDefinition;
-      error?: string;
-    };
-    if (!res.ok || !data.subcategory) {
-      throw new Error(data.error ?? 'Error al actualizar subcategoría.');
+      if (!res.ok || !parsed?.subcategory) {
+        throw new Error(parsed?.error ?? 'Error al actualizar subcategoría.');
+      }
+
+      await ProductService.refreshFromBackend();
+      return parsed.subcategory;
+    } catch {
+      const updated = await LocalBackendFallbackService.updateSubcategory(
+        id,
+        payload
+      );
+      await ProductService.refreshFromBackend();
+      return updated;
     }
-
-    await ProductService.refreshFromBackend();
-    return data.subcategory;
   },
 
   async deleteSubcategory(id: string): Promise<void> {
-    const res = await fetch(
-      `/api/v1/admin/subcategories/${encodeURIComponent(id)}`,
-      {
-        method: 'DELETE',
-        headers: this.buildAuthHeaders(),
-      }
-    );
+    try {
+      const res = await fetch(
+        `/api/v1/admin/subcategories/${encodeURIComponent(id)}`,
+        {
+          method: 'DELETE',
+          headers: this.buildAuthHeaders(),
+        }
+      );
 
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      throw new Error(data.error ?? 'Error al eliminar subcategoría.');
+      const { isStaticOrMissingApi } = await safeReadJson(res);
+      if (isStaticOrMissingApi) {
+        await LocalBackendFallbackService.deleteSubcategory(id);
+      }
+    } catch {
+      await LocalBackendFallbackService.deleteSubcategory(id);
     }
 
     await ProductService.refreshFromBackend();

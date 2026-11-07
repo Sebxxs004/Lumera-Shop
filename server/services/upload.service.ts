@@ -17,7 +17,7 @@ const UPLOADS_DIR = path.resolve(process.cwd(), 'public', 'uploads');
 /**
  * UploadService
  * Single Responsibility: Validates and stores uploaded product/variant images
- * on disk inside `public/uploads/` and returns the public asset URL.
+ * on disk inside `public/uploads/` (or returns validated Data URI on serverless read-only environments).
  */
 export const UploadService = {
   saveBase64Image(
@@ -46,10 +46,6 @@ export const UploadService = {
       throw new Error('La imagen supera el límite máximo permitido de 8 MB.');
     }
 
-    if (!fs.existsSync(UPLOADS_DIR)) {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    }
-
     const sanitizedPrefix = originalName
       .replace(/\.[^/.]+$/, '')
       .toLowerCase()
@@ -63,14 +59,25 @@ export const UploadService = {
       .slice(0, 10);
 
     const fileName = `${Date.now()}-${sanitizedPrefix || 'lumera'}-${hash}.${ext}`;
-    const fullPath = path.join(UPLOADS_DIR, fileName);
 
-    fs.writeFileSync(fullPath, buffer);
-
-    return {
-      url: `/uploads/${fileName}`,
-      fileName,
-      sizeBytes: buffer.byteLength,
-    };
+    try {
+      if (!fs.existsSync(UPLOADS_DIR)) {
+        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+      }
+      const fullPath = path.join(UPLOADS_DIR, fileName);
+      fs.writeFileSync(fullPath, buffer);
+      return {
+        url: `/uploads/${fileName}`,
+        fileName,
+        sizeBytes: buffer.byteLength,
+      };
+    } catch {
+      // Serverless read-only filesystem fallback: return validated Data URL
+      return {
+        url: dataUrl,
+        fileName,
+        sizeBytes: buffer.byteLength,
+      };
+    }
   },
 };

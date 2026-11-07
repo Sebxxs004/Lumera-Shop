@@ -9,6 +9,7 @@ import {
   ProductFilterState,
   SubcategoryDefinition,
 } from '../types/product.types';
+import { LocalBackendFallbackService } from './local-backend-fallback.service';
 import { VariantStockService } from './variant-stock.service';
 
 type CatalogChangeListener = () => void;
@@ -40,12 +41,33 @@ export const ProductService = {
   },
 
   async refreshFromBackend(): Promise<void> {
+    if (LocalBackendFallbackService.hasLocalOverrides()) {
+      const fallback = await LocalBackendFallbackService.getPublicCatalog();
+      currentProducts = fallback.products;
+      currentSubcategories = fallback.subcategories;
+      currentSignature = fallback.signature;
+      notifyCatalogListeners();
+      return;
+    }
+
     try {
       const res = await fetch('/api/v1/catalog', {
         headers: { Accept: 'application/json' },
       });
-      if (!res.ok) return;
-      const data = (await res.json()) as PublicCatalogResponse;
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!res.ok || contentType.includes('text/html')) {
+        const fallback = await LocalBackendFallbackService.getPublicCatalog();
+        currentProducts = fallback.products;
+        currentSubcategories = fallback.subcategories;
+        currentSignature = fallback.signature;
+        notifyCatalogListeners();
+        return;
+      }
+
+      const text = await res.text();
+      if (!text.trim()) return;
+      const data = JSON.parse(text) as PublicCatalogResponse;
+
       if (Array.isArray(data.products)) {
         currentProducts = data.products
           .filter((p) => p.isVisible !== false)
@@ -61,7 +83,11 @@ export const ProductService = {
       }
       notifyCatalogListeners();
     } catch {
-      // Fallback to seeded memory if offline
+      const fallback = await LocalBackendFallbackService.getPublicCatalog();
+      currentProducts = fallback.products;
+      currentSubcategories = fallback.subcategories;
+      currentSignature = fallback.signature;
+      notifyCatalogListeners();
     }
   },
 

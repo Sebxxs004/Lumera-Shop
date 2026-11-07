@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { PRODUCTS_DATA } from '../../src/data/products.data';
 import { INITIAL_SUBCATEGORIES_SEED } from '../../src/data/subcategories.data';
@@ -32,30 +33,62 @@ export interface DatabaseSchema {
   updatedAt: string;
 }
 
-const DB_FILE_PATH = path.resolve(
+const LOCAL_DB_PATH = path.resolve(
   process.cwd(),
   'server',
   'database',
   'lumera-db.json'
 );
+const TMP_DB_PATH = path.join(os.tmpdir(), 'lumera-db.json');
+
+let memoryDbCache: DatabaseSchema | null = null;
 
 /**
  * DatabaseRepository
  * Single Responsibility: Persistent server-side data storage, atomic read/write,
  * initial seed hydration, and accounting inventory ledger recording.
+ * Supports both local disk (`server/database/lumera-db.json`) and Vercel serverless (`/tmp/lumera-db.json`).
  */
 export const DatabaseRepository = {
   ensureInitialized(): DatabaseSchema {
-    if (fs.existsSync(DB_FILE_PATH)) {
+    // 1. Try reading from `/tmp` first if running in serverless and already written
+    if (fs.existsSync(TMP_DB_PATH)) {
       try {
-        const raw = fs.readFileSync(DB_FILE_PATH, 'utf8');
+        const raw = fs.readFileSync(TMP_DB_PATH, 'utf8');
         const parsed = JSON.parse(raw) as DatabaseSchema;
-        if (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.users)) {
+        if (
+          parsed &&
+          Array.isArray(parsed.products) &&
+          Array.isArray(parsed.users)
+        ) {
+          memoryDbCache = parsed;
           return parsed;
         }
       } catch {
-        // Re-seed if corrupted
+        // Continue
       }
+    }
+
+    // 2. Try reading from repository `server/database/lumera-db.json`
+    if (fs.existsSync(LOCAL_DB_PATH)) {
+      try {
+        const raw = fs.readFileSync(LOCAL_DB_PATH, 'utf8');
+        const parsed = JSON.parse(raw) as DatabaseSchema;
+        if (
+          parsed &&
+          Array.isArray(parsed.products) &&
+          Array.isArray(parsed.users)
+        ) {
+          memoryDbCache = parsed;
+          return parsed;
+        }
+      } catch {
+        // Continue
+      }
+    }
+
+    if (memoryDbCache) {
+      return memoryDbCache;
     }
 
     const nowIso = new Date().toISOString();
@@ -70,19 +103,14 @@ export const DatabaseRepository = {
       createdAt: nowIso,
     };
 
-    const seededProducts: Product[] = PRODUCTS_DATA.map((product) => {
-      // Assign default inventory mode appropriate for the product
-      const defaultMode =
-        product.department === 'boutique'
-          ? 'by_color_and_size'
-          : 'by_color_and_size';
-      return VariantStockService.normalizeProductInventory({
+    const seededProducts: Product[] = PRODUCTS_DATA.map((product) =>
+      VariantStockService.normalizeProductInventory({
         ...product,
-        inventoryMode: product.inventoryMode ?? defaultMode,
+        inventoryMode: product.inventoryMode ?? 'by_color_and_size',
         isVisible: true,
         updatedAt: nowIso,
-      });
-    });
+      })
+    );
 
     const initialLedger: InventoryLedgerEntry[] = seededProducts.map((prod) => {
       const totalStock = VariantStockService.getProductTotalStock(prod);
@@ -124,12 +152,24 @@ export const DatabaseRepository = {
   },
 
   save(data: DatabaseSchema): void {
-    const dir = path.dirname(DB_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
     data.updatedAt = new Date().toISOString();
-    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(data, null, 2), 'utf8');
+    memoryDbCache = data;
+    const serialized = JSON.stringify(data, null, 2);
+
+    // Attempt local save first, fallback to /tmp on Vercel read-only filesystem
+    try {
+      const dir = path.dirname(LOCAL_DB_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(LOCAL_DB_PATH, serialized, 'utf8');
+    } catch {
+      try {
+        fs.writeFileSync(TMP_DB_PATH, serialized, 'utf8');
+      } catch {
+        // Kept in memoryDbCache
+      }
+    }
   },
 
   recordLedgerEntry(params: {
@@ -165,7 +205,6 @@ export const DatabaseRepository = {
     };
 
     params.db.inventoryLedger.unshift(entry);
-    // Keep most recent 500 ledger records
     if (params.db.inventoryLedger.length > 500) {
       params.db.inventoryLedger = params.db.inventoryLedger.slice(0, 500);
     }
